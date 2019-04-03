@@ -33,6 +33,7 @@ RECT_HEIGHT = 50
 NUMBER_OF_SHAPES = 0  # 200
 NUMBER_OF_MIRRORS = 1  # 200
 SPEED_COEF = 0.03
+EPS = 10 ** (-9)
 
 
 class Mirror:
@@ -52,7 +53,7 @@ class Mirror:
 class RayElem:
 
     def __init__(self, x, y, radius, width, height, angle, delta_x, delta_y,
-                 delta_angle, color, game):
+                 delta_angle, color, mirrors):
         self.x = x
         self.y = y
         self.radius = radius
@@ -64,7 +65,7 @@ class RayElem:
         self.delta_angle = delta_angle
         self.color = color
         self.last_time = timeit.default_timer()
-        self.game = game
+        self.mirrors = mirrors
 
     def check_reflection(self, new_x, new_y, mirror):
 
@@ -72,7 +73,7 @@ class RayElem:
         if prs:
             print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
 
-    def reflect(self, new_x, new_y, mirror):
+    def reflect(self, new_x, new_y, mirror): # надо найти ближайший луч, точку пересечения и отразить.
         pass
 
     def move(self):
@@ -82,8 +83,7 @@ class RayElem:
         delta_t = 1
         new_x = self.x + self.delta_x * delta_t
         new_y = self.y + self.delta_y * delta_t
-        mirrors_list = MyGame.get_mirrors(self.game)
-        self.check_reflection(new_x, new_y, mirrors_list[0])
+        self.check_reflection(new_x, new_y, self.mirrors[0])
         if new_x > SCREEN_WIDTH:
             self.delta_x *= -1
             self.x = 2 * SCREEN_WIDTH - new_x
@@ -128,6 +128,15 @@ def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
            and intersect_1(y1, y2, y3, y4) \
            and area(x1, y1, x2, y2, x3, y3) * area(x1, y1, x2, y2, x4, y4) <= 0 \
            and area(x3, y3, x4, y4, x1, y1) * area(x3, y3, x4, y4, x2, y2) <= 0
+
+
+def det(a, b, c, d):
+    return a * d - b * c
+
+
+def between(a, b, c,):
+    return min(a, b) <= c + EPS and c <= max(a, b) + EPS
+
 
     # def move(self):
     # new_x = self.x + self.delta_x
@@ -214,7 +223,19 @@ class MyGame(arcade.Window):
                 shape = Ellipse(x, y, width, height, angle, d_x, d_y,
                                 d_angle, (red, green, blue, alpha))
             self.shape_list.append(shape)
-        mirror = Mirror(50, 50, 600, 600, 'flat', 0)
+        mirror = Mirror(50, 50, 75, 400, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(75, 400, 100, 40, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(450, 450, 530, 500, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(530, 500, 600, 480, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(600, 480, 450, 450, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(750, 80, 650, 200, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(600, 20, 750, 80, 'flat', 0)
         self.mirror_list.append(mirror)
 
     def update(self, dt):
@@ -233,11 +254,11 @@ class MyGame(arcade.Window):
             shape.draw()
         for mirror in self.mirror_list:
             mirror.draw()
-
     def on_mouse_press(self, x, y, button, modifiers):
         """
         Called when the user presses a mouse button.
         """
+        # arcade.window_commands.pause
 
         if self.ray_creation_flag:
             # print('!!', self.ray_creation_flag, self.ray_coords_x, self.ray_coords_y)
@@ -261,8 +282,9 @@ class MyGame(arcade.Window):
                 #           0, (red, green, blue, alpha))
 
                 ray = RayElem(self.ray_coords_x + math.sin(angle) * i, self.ray_coords_y + math.cos(angle) * i, radius,
-                          self.ray_coords_x + 2 * radius,
-                          self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha), self)
+                              self.ray_coords_x + 2 * radius,
+                              self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha),
+                              self.mirror_list)
                 self.shape_list.append(ray)
             self.ray_creation_flag = False
         else:
@@ -270,6 +292,11 @@ class MyGame(arcade.Window):
             self.ray_coords_x = x
             self.ray_coords_y = y
         print(x, y)
+
+    def on_key_press(self, symbol: int, modifiers: int):
+        print(symbol, modifiers)
+        if symbol == 112:
+            arcade.pause(2)
 
 
 def main():
