@@ -49,7 +49,7 @@ class Mirror:
         arcade.draw_line(self.x1, self.y1, self.x2, self.y2, arcade.color.WHITE, 3)
 
 
-class Shape:
+class RayElem:
 
     def __init__(self, x, y, radius, width, height, angle, delta_x, delta_y,
                  delta_angle, color):
@@ -64,6 +64,13 @@ class Shape:
         self.delta_angle = delta_angle
         self.color = color
         self.last_time = timeit.default_timer()
+
+    def check_reflection(self, new_x, new_y, mirror):
+
+        pass
+
+    def reflect(self, new_x, new_y, mirror):
+        pass
 
     def move(self):
         # curr_time = timeit.default_timer()
@@ -92,6 +99,22 @@ class Shape:
         # self.x += self.delta_x
         # self.y += self.delta_y
         # self.angle += self.delta_angle
+    def draw(self):
+        arcade.draw_circle_filled(self.x , self.y , self.radius, self.color)
+        # arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
+        #                              self.color, self.angle)
+
+
+def intersect_1(a, b, c, d):
+    if a > b:
+        b, a = a, b
+    if c > d:
+        c, d = d, c
+    return max(a,c) <= min(b,d)
+
+
+def area(x1, y1, x2, y2, x3, y3):
+    return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 
 
 
@@ -113,21 +136,20 @@ class Shape:
     #
     # self.angle += self.delta_angle
     # self.angle = self.angle % 160
-class Ellipse(Shape):
+class Ellipse(RayElem):
 
     def draw(self):
         arcade.draw_ellipse_filled(self.x, self.y, self.width, self.height,
                                    self.color, self.angle)
 
 
-class Rectangle(Shape):
+class Rectangle(RayElem):
 
     def draw(self):
         arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
                                      self.color, self.angle)
 
-
-class Ray(Shape):
+class Ray_temp(RayElem):
 
     def draw(self):
         arcade.draw_circle_filled(self.x , self.y , self.radius, self.color)
