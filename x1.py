@@ -69,9 +69,11 @@ class RayElem:
 
     def check_reflection(self, new_x, new_y, mirror):
 
-        prs = intersect(self.x, self.y, new_x, new_y, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+        prs, x, y = intersect(self.x, self.y, new_x, new_y, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
         if prs:
-            print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
+            print(x, y)
+            # print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
+            pass
 
     def reflect(self, new_x, new_y, mirror): # надо найти ближайший луч, точку пересечения и отразить.
         pass
@@ -83,7 +85,8 @@ class RayElem:
         delta_t = 1
         new_x = self.x + self.delta_x * delta_t
         new_y = self.y + self.delta_y * delta_t
-        self.check_reflection(new_x, new_y, self.mirrors[0])
+        for mirror in self.mirrors:
+            self.check_reflection(new_x, new_y, mirror)
         if new_x > SCREEN_WIDTH:
             self.delta_x *= -1
             self.x = 2 * SCREEN_WIDTH - new_x
@@ -123,7 +126,7 @@ def area(x1, y1, x2, y2, x3, y3):
     return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 
 
-def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
+def check_intersect(x1, y1, x2, y2, x3, y3, x4, y4):
     return intersect_1(x1, x2, x3, x4) \
            and intersect_1(y1, y2, y3, y4) \
            and area(x1, y1, x2, y2, x3, y3) * area(x1, y1, x2, y2, x4, y4) <= 0 \
@@ -137,6 +140,22 @@ def det(a, b, c, d):
 def between(a, b, c,):
     return min(a, b) <= c + EPS and c <= max(a, b) + EPS
 
+
+def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
+    A1, B1= y1 - y2, x2 - x1
+    C1 = -A1 * x1 - B1 * y1
+    A2, B2 = y3 - y4, x4 - x3
+    C2 = -A2 * x3 - B2 * y3
+    zn = det(A1, B1, A2, B2)
+    if zn:
+        x = -det(C1, B1, C2, B2) * 1. / zn
+        y = - det(A1, C1, A2, C2) * 1. / zn
+        return between(x1, x2, x) and between(y1, y2, y) and between(x3, x4, x) and between(y3, y4, y), x, y
+    else:
+        return det(A1, C1, A2, C2) == 0 and \
+               det(B1, C1, B2, C2) == 0 and \
+               intersect_1(x1, x2, x3, x4) and\
+               intersect_1(y1, y2, y3, y4), None, None
 
     # def move(self):
     # new_x = self.x + self.delta_x
