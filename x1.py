@@ -31,8 +31,22 @@ RECT_WIDTH = 50
 RECT_HEIGHT = 50
 
 NUMBER_OF_SHAPES = 0  # 200
+NUMBER_OF_MIRRORS= 1  # 200
 SPEED_COEF = 0.03
 
+
+class Mirror:
+    def __init__(self, x1, y1, x2, y2, type, rad):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.type = type # if type in ['flat', 'curve']
+        self.rad = rad  # TODO дописать проверку соответствия радиуса и типа зеркала
+
+    def draw(self):
+        # if type == 'flat':
+        arcade.draw_line(self.x1, self.y1, self.x2, self.y2, arcade.color.WHITE, 3)
 
 
 class Shape:
@@ -127,6 +141,7 @@ class MyGame(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         self.shape_list = None
+        self.mirror_list = None
         self.ray_creation_flag = False
         self.ray_coords_x = None
         self.ray_coords_y = None
@@ -134,6 +149,7 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
+        self.mirror_list= []
 
         for i in range(NUMBER_OF_SHAPES):
             x = random.randrange(0, SCREEN_WIDTH)
@@ -160,6 +176,8 @@ class MyGame(arcade.Window):
                 shape = Ellipse(x, y, width, height, angle, d_x, d_y,
                                 d_angle, (red, green, blue, alpha))
             self.shape_list.append(shape)
+        mirror = Mirror(50, 50, 200, 200, 'flat', 0)
+        self.mirror_list.append(mirror)
 
     def update(self, dt):
         """ Move everything """
@@ -175,6 +193,8 @@ class MyGame(arcade.Window):
 
         for shape in self.shape_list:
             shape.draw()
+        for mirror in self.mirror_list:
+            mirror.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
