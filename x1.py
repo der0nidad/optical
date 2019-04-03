@@ -31,7 +31,7 @@ RECT_WIDTH = 50
 RECT_HEIGHT = 50
 
 NUMBER_OF_SHAPES = 0  # 200
-NUMBER_OF_MIRRORS= 1  # 200
+NUMBER_OF_MIRRORS = 1  # 200
 SPEED_COEF = 0.03
 
 
@@ -41,7 +41,7 @@ class Mirror:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.type = type # if type in ['flat', 'curve']
+        self.type = type  # if type in ['flat', 'curve']
         self.rad = rad  # TODO дописать проверку соответствия радиуса и типа зеркала
 
     def draw(self):
@@ -52,7 +52,7 @@ class Mirror:
 class RayElem:
 
     def __init__(self, x, y, radius, width, height, angle, delta_x, delta_y,
-                 delta_angle, color):
+                 delta_angle, color, game):
         self.x = x
         self.y = y
         self.radius = radius
@@ -64,10 +64,13 @@ class RayElem:
         self.delta_angle = delta_angle
         self.color = color
         self.last_time = timeit.default_timer()
+        self.game = game
 
     def check_reflection(self, new_x, new_y, mirror):
 
-        pass
+        prs = intersect(self.x, self.y, new_x, new_y, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+        if prs:
+            print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
 
     def reflect(self, new_x, new_y, mirror):
         pass
@@ -79,6 +82,8 @@ class RayElem:
         delta_t = 1
         new_x = self.x + self.delta_x * delta_t
         new_y = self.y + self.delta_y * delta_t
+        mirrors_list = MyGame.get_mirrors(self.game)
+        self.check_reflection(new_x, new_y, mirrors_list[0])
         if new_x > SCREEN_WIDTH:
             self.delta_x *= -1
             self.x = 2 * SCREEN_WIDTH - new_x
@@ -99,8 +104,9 @@ class RayElem:
         # self.x += self.delta_x
         # self.y += self.delta_y
         # self.angle += self.delta_angle
+
     def draw(self):
-        arcade.draw_circle_filled(self.x , self.y , self.radius, self.color)
+        arcade.draw_circle_filled(self.x, self.y, self.radius, self.color)
         # arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
         #                              self.color, self.angle)
 
@@ -110,14 +116,18 @@ def intersect_1(a, b, c, d):
         b, a = a, b
     if c > d:
         c, d = d, c
-    return max(a,c) <= min(b,d)
+    return max(a, c) <= min(b, d)
 
 
 def area(x1, y1, x2, y2, x3, y3):
     return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 
 
-
+def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
+    return intersect_1(x1, x2, x3, x4) \
+           and intersect_1(y1, y2, y3, y4) \
+           and area(x1, y1, x2, y2, x3, y3) * area(x1, y1, x2, y2, x4, y4) <= 0 \
+           and area(x3, y3, x4, y4, x1, y1) * area(x3, y3, x4, y4, x2, y2) <= 0
 
     # def move(self):
     # new_x = self.x + self.delta_x
@@ -136,6 +146,8 @@ def area(x1, y1, x2, y2, x3, y3):
     #
     # self.angle += self.delta_angle
     # self.angle = self.angle % 160
+
+
 class Ellipse(RayElem):
 
     def draw(self):
@@ -149,10 +161,11 @@ class Rectangle(RayElem):
         arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
                                      self.color, self.angle)
 
+
 class Ray_temp(RayElem):
 
     def draw(self):
-        arcade.draw_circle_filled(self.x , self.y , self.radius, self.color)
+        arcade.draw_circle_filled(self.x, self.y, self.radius, self.color)
         # arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
         #                              self.color, self.angle)
 
@@ -168,10 +181,13 @@ class MyGame(arcade.Window):
         self.ray_coords_x = None
         self.ray_coords_y = None
 
+    def get_mirrors(self):
+        return self.mirror_list
+
     def setup(self):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
-        self.mirror_list= []
+        self.mirror_list = []
 
         for i in range(NUMBER_OF_SHAPES):
             x = random.randrange(0, SCREEN_WIDTH)
@@ -198,7 +214,7 @@ class MyGame(arcade.Window):
                 shape = Ellipse(x, y, width, height, angle, d_x, d_y,
                                 d_angle, (red, green, blue, alpha))
             self.shape_list.append(shape)
-        mirror = Mirror(50, 50, 200, 200, 'flat', 0)
+        mirror = Mirror(50, 50, 600, 600, 'flat', 0)
         self.mirror_list.append(mirror)
 
     def update(self, dt):
@@ -244,8 +260,9 @@ class MyGame(arcade.Window):
                 # ray = Ray(self.ray_coords_x, self.ray_coords_y, width, height, angle, diff_x, diff_y,
                 #           0, (red, green, blue, alpha))
 
-                ray = Ray(self.ray_coords_x + math.sin(angle) * i , self.ray_coords_y + math.cos(angle) * i, radius, self.ray_coords_x +2 * radius,
-                          self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha))
+                ray = RayElem(self.ray_coords_x + math.sin(angle) * i, self.ray_coords_y + math.cos(angle) * i, radius,
+                          self.ray_coords_x + 2 * radius,
+                          self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha), self)
                 self.shape_list.append(ray)
             self.ray_creation_flag = False
         else:
