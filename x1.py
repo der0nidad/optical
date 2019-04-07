@@ -37,12 +37,12 @@ EPS = 10 ** (-9)
 
 
 class Mirror:
-    def __init__(self, x1, y1, x2, y2, type, rad):
+    def __init__(self, x1, y1, x2, y2, typ, rad):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.type = type  # if type in ['flat', 'curve']
+        self.type = typ  # if type in ['flat', 'curve']
         self.rad = rad  # TODO дописать проверку соответствия радиуса и типа зеркала
 
     def draw(self):
@@ -71,9 +71,26 @@ class RayElem:
 
         prs, x, y = intersect(self.x, self.y, new_x, new_y, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
         if prs:
-            print(x, y)
+            norm_x = mirror.y1 - mirror.y2
+            norm_y = mirror.x2 - mirror.x1
+            ai_x = x - self.x
+            ai_y = y - self.y
+            s = (2 * ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
+            print(s)
+            norm_x *= -s
+            norm_y *= -s
+            ai_x += norm_x
+            ai_y += norm_y
+            new_x = x + ai_x
+            new_y = y + ai_y
+            print(self.x, self.y, '*', x, y, '*', ai_x, ai_y, '*', new_x, new_y)
+            # self.delta_y *= -1
+            self.delta_x *= -1
+        return new_x, new_y
+
+            # print('norm', norm_x, norm_y, 'ai', ai)
+            # print(x, y)
             # print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
-            pass
 
     def reflect(self, new_x, new_y, mirror): # надо найти ближайший луч, точку пересечения и отразить.
         pass
@@ -86,7 +103,11 @@ class RayElem:
         new_x = self.x + self.delta_x * delta_t
         new_y = self.y + self.delta_y * delta_t
         for mirror in self.mirrors:
-            self.check_reflection(new_x, new_y, mirror)
+            if check_intersect(self.x, self.y, new_x, new_y, mirror.x1, mirror.y1, mirror.x2, mirror.y2):
+                new_x, new_y = self.check_reflection(new_x, new_y, mirror)
+        # for mirror in self.mirrors:
+        #     self.check_reflection(new_x, new_y, mirror)
+
         if new_x > SCREEN_WIDTH:
             self.delta_x *= -1
             self.x = 2 * SCREEN_WIDTH - new_x
@@ -243,18 +264,20 @@ class MyGame(arcade.Window):
                                 d_angle, (red, green, blue, alpha))
             self.shape_list.append(shape)
         mirror = Mirror(50, 50, 75, 400, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(75, 400, 100, 40, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(450, 450, 530, 500, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(530, 500, 600, 480, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(600, 480, 450, 450, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(750, 80, 650, 200, 'flat', 0)
-        self.mirror_list.append(mirror)
-        mirror = Mirror(600, 20, 750, 80, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(75, 400, 100, 40, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(450, 450, 530, 500, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(530, 500, 600, 480, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(600, 480, 450, 450, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(750, 80, 650, 200, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        # mirror = Mirror(600, 20, 750, 80, 'flat', 0)
+        # self.mirror_list.append(mirror)
+        mirror = Mirror(50, 50, 600, 70, 'flat', 0)
         self.mirror_list.append(mirror)
 
     def update(self, dt):
@@ -283,7 +306,7 @@ class MyGame(arcade.Window):
             # print('!!', self.ray_creation_flag, self.ray_coords_x, self.ray_coords_y)
             # sys.exit(0)
 
-            for i in range(0, 100, 2):
+            for i in range(0, 2, 2):
                 treshold = 150
                 red = random.randrange(56) + treshold
                 green = random.randrange(56) + treshold
