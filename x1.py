@@ -77,6 +77,8 @@ def reflect(x1, y1, x, y, mirror):
     ai_y += norm_y
     len_ai = math.sqrt(ai_x ** 2 + ai_y ** 2)
     return ai_x / len_ai, ai_y / len_ai
+
+
 # класс содержит текущий вектор скорости и список уже имеющихся лучей
 class RayLine:
     def __init__(self, x, y, vx, vy, mirrors):
@@ -86,8 +88,6 @@ class RayLine:
         self.count = LINE_NUM
         self.mirrors = mirrors
         # self.calc_ray(x, y, self.mirrors)
-
-
 
     #   Добавляет луч в список. Обновляет текущий вектор скорости луча
     def calc_ray(self, x0, y0, mirrors):
@@ -102,7 +102,8 @@ class RayLine:
                 if mirror is not last_mirror:
                     print(last_mirror)
                     # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
-                    prs, x, y = intersect(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+                    prs, x, y = intersect(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300, mirror.x1, mirror.y1,
+                                          mirror.x2, mirror.y2)
                     print(prs, x, y)
                     if prs:
                         ray = Segment(x1, y1, x, y)
@@ -128,7 +129,6 @@ class RayLine:
     def draw(self):
         for ray in self.segment_list:
             ray.draw()
-
 
 
 class RayElem:
@@ -265,46 +265,10 @@ def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
                intersect_1(x1, x2, x3, x4) and \
                intersect_1(y1, y2, y3, y4), None, None
 
-    # def move(self):
-    # new_x = self.x + self.delta_x
-    # new_y = self.y + self.delta_y
-    # if new_x > SCREEN_HEIGHT:
-    #     self.x = SCREEN_HEIGHT - self.delta_x
-    #     self.angle += 90
-    # else:
-    #     self.x += self.delta_x
-    # if new_y > SCREEN_WIDTH:
-    #     self.y = SCREEN_WIDTH - self.delta_y
-    #     self.angle += 90
-    #
-    # else:
-    #     self.y += self.delta_y
-    #
-    # self.angle += self.delta_angle
-    # self.angle = self.angle % 160
-
-
-class Ellipse(RayElem):
-
-    def draw(self):
-        arcade.draw_ellipse_filled(self.x, self.y, self.width, self.height,
-                                   self.color, self.angle)
-
-
-class Rectangle(RayElem):
-
-    def draw(self):
-        arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
-                                     self.color, self.angle)
-
 
 class Ray_temp(RayElem):
-
     def draw(self):
         arcade.draw_circle_filled(self.x, self.y, self.radius, self.color)
-        # arcade.draw_rectangle_filled(self.x, self.y, self.width, self.height,
-        #                              self.color, self.angle)
-
 
 class MyGame(arcade.Window):
     """ Main application class. """
@@ -325,33 +289,6 @@ class MyGame(arcade.Window):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
         self.mirror_list = []
-
-
-        for i in range(NUMBER_OF_SHAPES):
-            x = random.randrange(0, SCREEN_WIDTH)
-            y = random.randrange(0, SCREEN_HEIGHT)
-            width = random.randrange(10, 30)
-            height = random.randrange(10, 30)
-            angle = random.randrange(0, 360)
-
-            d_x = random.randrange(-3, 4)
-            d_y = random.randrange(-3, 4)
-            d_angle = random.randrange(-3, 4)
-
-            red = random.randrange(256)
-            green = random.randrange(256)
-            blue = random.randrange(256)
-            alpha = random.randrange(256)
-
-            shape_type = random.randrange(2)
-
-            if shape_type == 0:
-                shape = Rectangle(x, y, width, height, angle, d_x, d_y,
-                                  d_angle, (red, green, blue, alpha))
-            else:
-                shape = Ellipse(x, y, width, height, angle, d_x, d_y,
-                                d_angle, (red, green, blue, alpha))
-            self.shape_list.append(shape)
         mirror = Mirror(50, 50, 75, 400, 'flat', 0)
         self.mirror_list.append(mirror)
         mirror = Mirror(75, 400, 100, 40, 'flat', 0)
@@ -393,12 +330,8 @@ class MyGame(arcade.Window):
         """
         Called when the user presses a mouse button.
         """
-        # arcade.window_commands.pause
 
         if self.ray_creation_flag:
-            # print('!!', self.ray_creation_flag, self.ray_coords_x, self.ray_coords_y)
-            # sys.exit(0)
-
             for i in range(0, 2, 2):
                 treshold = 150
                 red = random.randrange(56) + treshold
@@ -408,14 +341,8 @@ class MyGame(arcade.Window):
                 diff_x = x - self.ray_coords_x
                 diff_y = y - self.ray_coords_y
                 angle = math.atan2(diff_x, diff_y)
-                # diff_x *= 0.3
-                # diff_y *= 0.3
                 radius = 5
                 print('DIFы', diff_x, diff_y, angle)
-
-                # ray = Ray(self.ray_coords_x, self.ray_coords_y, width, height, angle, diff_x, diff_y,
-                #           0, (red, green, blue, alpha))
-
                 ray = RayElem(self.ray_coords_x + math.sin(angle) * i, self.ray_coords_y + math.cos(angle) * i, radius,
                               self.ray_coords_x + 2 * radius,
                               self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha),
