@@ -142,7 +142,9 @@ class RayLine:
         x1 = self.x_0
         y1 = self.y_0
         last_mirror = None
+        ban_mirrors = []
         while self.count > 0:
+            inters_mirrors = []
             fl = False
             print('count', self.count)
             for mirror in mirrors:
@@ -152,7 +154,20 @@ class RayLine:
                                           mirror.x2, mirror.y2)
                     # print(prs, x, y)
                     if prs:
-                        print(last_mirror, last_mirror == mirror)
+                        # find closest mirror
+                        distance = math.sqrt((x1 - x) ** 2 + (y1 - y) ** 2)
+                        inters_mirrors.append((distance, mirror))
+                        inters_mirrors.sort(key=lambda s: s[0])
+                        print(inters_mirrors)
+            for mirror in mirrors:
+                if mirror is not last_mirror:
+                    # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+                    prs, x, y = intersect(x1, y1, x1 + self.vx * 400, y1 + self.vy * 400, mirror.x1, mirror.y1,
+                                          mirror.x2, mirror.y2)
+                    # print(prs, x, y)
+                    if prs:
+                        # find closest mirror
+
 
                         ray = Segment(x1, y1, x, y)
                         self.segment_list.append(ray)
