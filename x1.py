@@ -16,7 +16,9 @@ be drawn using Vertex Buffer Objects for better performance.
 If Python and Arcade are installed, this example can be run from the command line with:
 python -m arcade.examples.shapes
 """
+import json
 import math
+import sys
 
 import arcade
 
@@ -43,7 +45,7 @@ def reflect(x1, y1, x, y, mirror):
     norm_y /= len_norm
     ai_x = x - x1
     ai_y = y - y1
-    s = 2 *(ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
+    s = 2 * (ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
     norm_x *= s
     norm_y *= s
     ai_x -= norm_x
@@ -126,12 +128,12 @@ class Segment:
 
 # класс содержит текущий вектор скорости и список уже имеющихся лучей
 class RayLine:
-    def __init__(self, x, y, vx, vy, mirrors):
+    def __init__(self, x, y, x2, y2, mirrors):
         self.segment_list = []
         self.x_0 = x
         self.y_0 = y
-        self.vx = vx - x
-        self.vy = vy - y
+        self.vx = x2 - x
+        self.vy = y2 - y
         self.count = LINE_NUM
         self.mirrors = mirrors
 
@@ -184,8 +186,12 @@ class MyGame(arcade.Window):
         self.shape_list = None
         self.mirror_list = None
         self.ray_creation_flag = False
-        self.ray_coords_x = None
-        self.ray_coords_y = None
+        self.mirror_creation_flag = False
+        self.click_flag = False
+        self.continious_flag = False
+        self.prev_coords_x = None
+        self.prev_coords_y = None
+        self.filename = 'Optical'
         self.ray = RayLine(620, 180, 200, -700, self.mirror_list)
 
     def get_mirrors(self):
@@ -195,7 +201,8 @@ class MyGame(arcade.Window):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
         self.mirror_list = []
-        coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20), # (100, 60, 750, 60)
+        coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20),
+                      # (100, 60, 750, 60)
                       (450, 500, 750, 80)]
         for c in coord_list:
             mirror = Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
@@ -228,30 +235,68 @@ class MyGame(arcade.Window):
         """
         # arcade.window_commands.pause
 
-        if self.ray_creation_flag:
-            diff_x = x - self.ray_coords_x
-            diff_y = y - self.ray_coords_y
-            angle = math.atan2(diff_x, diff_y)
-            # diff_x *= 0.3
-            # diff_y *= 0.3
-            print('DIFы', diff_x, diff_y, angle)
-            self.ray = RayLine(x, y, diff_x, diff_y, self.mirror_list)
-            # ray = RayElem(self.ray_coords_x + math.sin(angle) * i, self.ray_coords_y + math.cos(angle) * i, radius,
-            #               self.ray_coords_x + 2 * radius,
-            #               self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha),
-            #               self.mirror_list)
-            # self.shape_list.append(ray)
-            self.ray_creation_flag = False
+        if self.click_flag:
+            if self.mirror_creation_flag:
+                mirror = Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
+                self.mirror_list.append(mirror)
+                self.prev_coords_x = x
+                self.prev_coords_y = y
+                if self.continious_flag:
+                    self.click_flag = True
+                else:
+                    self.click_flag = False
+            elif self.ray_creation_flag:
+                self.ray = RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list)
+                self.ray.calc_ray(self.mirror_list)
+                self.click_flag = False
         else:
-            self.ray_creation_flag = True
-            self.ray_coords_x = x
-            self.ray_coords_y = y
+            if self.continious_flag:
+                mirror = Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
+                self.mirror_list.append(mirror)
+            self.click_flag = True
+            self.prev_coords_x = x
+            self.prev_coords_y = y
         # print(x, y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         print(symbol, modifiers)
-        if symbol == 112:
+        if symbol == 112:  # p
             arcade.pause(2)
+        elif symbol == 109:  # m
+            self.click_flag = False
+            self.mirror_creation_flag = True
+            self.ray_creation_flag = False
+        elif symbol == 100:  # d
+            pass
+        elif symbol == 101:  # e
+            pass
+        elif symbol == 114:  # r
+            self.click_flag = False
+            self.continious_flag = False
+            self.ray_creation_flag = True
+            self.mirror_creation_flag = False
+        elif symbol == 111:  # o - непрерывное создание зеркал
+            self.continious_flag = not self.continious_flag
+            print('Continious flag current value:', self.continious_flag)
+        elif symbol == 97:  # a - delete all
+            self.mirror_list = []
+            self.ray = None
+        elif symbol == 115:  # s - save to json
+            json_content = self.serialize()
+            self.save_to_file(str(self.filename) + '.json', json_content)
+        elif symbol == 108:  # l - load from json. rewrite current room
+            pass
+        elif symbol == 113:  # q - exit
+            print('bye')
+            sys.exit(0)
+
+    def serialize(self):
+        return {'cool_game_key': 'ты пидор'}
+
+    def save_to_file(self, filename, json_content):
+        with open(filename, 'w') as f:
+            json.dump(json_content, f)
+        print('saved')
 
 
 def main():
