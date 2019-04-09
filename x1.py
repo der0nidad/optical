@@ -38,13 +38,16 @@ LINE_NUM = 30
 def reflect(x1, y1, x, y, mirror):
     norm_x = mirror.y1 - mirror.y2
     norm_y = mirror.x2 - mirror.x1
+    len_norm = math.sqrt(norm_x ** 2 + norm_y ** 2)
+    norm_x /= len_norm
+    norm_y /= len_norm
     ai_x = x - x1
     ai_y = y - y1
-    s = (2 * ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
-    norm_x *= -s
-    norm_y *= -s
-    ai_x += norm_x
-    ai_y += norm_y
+    s = 2 *(ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
+    norm_x *= s
+    norm_y *= s
+    ai_x -= norm_x
+    ai_y -= norm_y
     len_ai = math.sqrt(ai_x ** 2 + ai_y ** 2)
     return ai_x / len_ai, ai_y / len_ai
 
@@ -84,6 +87,18 @@ def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
 
 class Mirror:
     def __init__(self, x1, y1, x2, y2, typ, rad):
+        # if x1 <= x2:
+        #     self.x1 = x1
+        #     self.x2 = x2
+        # else:
+        #     self.x1 = x2
+        #     self.x2 = x1
+        # if y1 <= y2:
+        #     self.y1 = y1
+        #     self.y2 = y2
+        # else:
+        #     self.y1 = y2
+        #     self.y2 = y1
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -113,33 +128,32 @@ class Segment:
 class RayLine:
     def __init__(self, x, y, vx, vy, mirrors):
         self.segment_list = []
-        self.xo = x
-        self.yo = y
+        self.x_0 = x
+        self.y_0 = y
         self.vx = vx - x
         self.vy = vy - y
         self.count = LINE_NUM
         self.mirrors = mirrors
 
-    #   Добавляет луч в список. Обновляет текущий вектор скорости луча
-    def calc_ray(self, x0, y0, mirrors):
-        x1 = x0
-        y1 = y0
+    #   Считает путь луча
+    def calc_ray(self, mirrors):
+        x1 = self.x_0
+        y1 = self.y_0
         last_mirror = None
         while self.count > 0:
             fl = False
             print('count', self.count)
             for mirror in mirrors:
-                print('--')
                 if mirror is not last_mirror:
-                    print(last_mirror)
                     # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
-                    prs, x, y = intersect(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300, mirror.x1, mirror.y1,
+                    prs, x, y = intersect(x1, y1, x1 + self.vx * 400, y1 + self.vy * 400, mirror.x1, mirror.y1,
                                           mirror.x2, mirror.y2)
-                    print(prs, x, y)
+                    # print(prs, x, y)
                     if prs:
+                        print(last_mirror, last_mirror == mirror)
+
                         ray = Segment(x1, y1, x, y)
                         self.segment_list.append(ray)
-
                         ai_x, ai_y = reflect(x1, y1, x, y, mirror)
                         self.vx = ai_x
                         self.vy = ai_y
@@ -151,7 +165,7 @@ class RayLine:
                         self.count -= 1
                         break
             if not fl:
-                ray = Segment(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300)
+                ray = Segment(x1, y1, x1 + self.vx * 3000, y1 + self.vy * 3000)
                 self.segment_list.append(ray)
                 print(ray, '|', len(self.segment_list))
                 return
@@ -172,7 +186,7 @@ class MyGame(arcade.Window):
         self.ray_creation_flag = False
         self.ray_coords_x = None
         self.ray_coords_y = None
-        self.ray = RayLine(620, 80, 1000, 700, self.mirror_list)
+        self.ray = RayLine(620, 180, 200, -700, self.mirror_list)
 
     def get_mirrors(self):
         return self.mirror_list
@@ -181,13 +195,13 @@ class MyGame(arcade.Window):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
         self.mirror_list = []
-        coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (400, 20, 750, 80),
-                      (750, 80, 450, 500)]
+        coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20), # (100, 60, 750, 60)
+                      (450, 500, 750, 80)]
         for c in coord_list:
             mirror = Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
             self.mirror_list.append(mirror)
         if self.ray:
-            self.ray.calc_ray(self.ray.xo, self.ray.yo, self.get_mirrors())
+            self.ray.calc_ray(self.get_mirrors())
 
     def update(self, dt):
         """ Move everything """
