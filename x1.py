@@ -113,6 +113,8 @@ class Segment:
 class RayLine:
     def __init__(self, x, y, vx, vy, mirrors):
         self.segment_list = []
+        self.xo = x
+        self.yo = y
         self.vx = vx - x
         self.vy = vy - y
         self.count = LINE_NUM
@@ -184,7 +186,8 @@ class MyGame(arcade.Window):
         for c in coord_list:
             mirror = Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
             self.mirror_list.append(mirror)
-        self.ray.calc_ray(620, 80, self.get_mirrors())
+        if self.ray:
+            self.ray.calc_ray(self.ray.xo, self.ray.yo, self.get_mirrors())
 
     def update(self, dt):
         """ Move everything """
@@ -202,13 +205,34 @@ class MyGame(arcade.Window):
             shape.draw()
         for mirror in self.mirror_list:
             mirror.draw()
-        self.ray.draw()
+        if self.ray:
+            self.ray.draw()
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
         Called when the user presses a mouse button.
         """
-        print(x, y)
+        # arcade.window_commands.pause
+
+        if self.ray_creation_flag:
+            diff_x = x - self.ray_coords_x
+            diff_y = y - self.ray_coords_y
+            angle = math.atan2(diff_x, diff_y)
+            # diff_x *= 0.3
+            # diff_y *= 0.3
+            print('DIFы', diff_x, diff_y, angle)
+            self.ray = RayLine(x, y, diff_x, diff_y, self.mirror_list)
+            # ray = RayElem(self.ray_coords_x + math.sin(angle) * i, self.ray_coords_y + math.cos(angle) * i, radius,
+            #               self.ray_coords_x + 2 * radius,
+            #               self.ray_coords_y + 2 * radius, angle, diff_x, diff_y, 0, (red, green, blue, alpha),
+            #               self.mirror_list)
+            # self.shape_list.append(ray)
+            self.ray_creation_flag = False
+        else:
+            self.ray_creation_flag = True
+            self.ray_coords_x = x
+            self.ray_coords_y = y
+        # print(x, y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         print(symbol, modifiers)
