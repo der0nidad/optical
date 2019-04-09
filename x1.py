@@ -34,6 +34,7 @@ NUMBER_OF_SHAPES = 0  # 200
 NUMBER_OF_MIRRORS = 1  # 200
 SPEED_COEF = 0.03
 EPS = 10 ** (-9)
+LINE_NUM = 30
 
 
 class Mirror:
@@ -48,6 +49,86 @@ class Mirror:
     def draw(self):
         # if type == 'flat':
         arcade.draw_line(self.x1, self.y1, self.x2, self.y2, arcade.color.WHITE, 3)
+
+
+class Segment:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def __str__(self):
+        return 'Segment ' + str(self.x1) + ' ' + str(self.y1) + ' ' + str(self.x2) + ' ' + str(self.y2)
+
+    def draw(self):
+        arcade.draw_line(self.x1, self.y1, self.x2, self.y2, arcade.color.BRIGHT_GREEN, 1)
+
+
+def reflect(x1, y1, x, y, mirror):
+    norm_x = mirror.y1 - mirror.y2
+    norm_y = mirror.x2 - mirror.x1
+    ai_x = x - x1
+    ai_y = y - y1
+    s = (2 * ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
+    norm_x *= -s
+    norm_y *= -s
+    ai_x += norm_x
+    ai_y += norm_y
+    len_ai = math.sqrt(ai_x ** 2 + ai_y ** 2)
+    return ai_x / len_ai, ai_y / len_ai
+# класс содержит текущий вектор скорости и список уже имеющихся лучей
+class RayLine:
+    def __init__(self, x, y, vx, vy, mirrors):
+        self.segment_list = []
+        self.vx = vx - x
+        self.vy = vy - y
+        self.count = LINE_NUM
+        self.mirrors = mirrors
+        # self.calc_ray(x, y, self.mirrors)
+
+
+
+    #   Добавляет луч в список. Обновляет текущий вектор скорости луча
+    def calc_ray(self, x0, y0, mirrors):
+        x1 = x0
+        y1 = y0
+        last_mirror = None
+        while self.count > 0:
+            fl = False
+            print('count', self.count)
+            for mirror in mirrors:
+                print('--')
+                if mirror is not last_mirror:
+                    print(last_mirror)
+                    # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+                    prs, x, y = intersect(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+                    print(prs, x, y)
+                    if prs:
+                        ray = Segment(x1, y1, x, y)
+                        self.segment_list.append(ray)
+
+                        ai_x, ai_y = reflect(x1, y1, x, y, mirror)
+                        self.vx = ai_x
+                        self.vy = ai_y
+
+                        x1 = x
+                        y1 = y
+                        last_mirror = mirror
+                        fl = True
+                        self.count -= 1
+                        break
+            if not fl:
+                ray = Segment(x1, y1, x1 + self.vx * 300, y1 + self.vy * 300)
+                self.segment_list.append(ray)
+                print(ray, '|', len(self.segment_list))
+                return
+                # self.count = 0
+
+    def draw(self):
+        for ray in self.segment_list:
+            ray.draw()
+
 
 
 class RayElem:
@@ -75,24 +156,30 @@ class RayElem:
             norm_y = mirror.x2 - mirror.x1
             ai_x = x - self.x
             ai_y = y - self.y
+            print('d', (self.delta_x, self.delta_y), self.delta_x / self.delta_y, 'n', (ai_x, ai_y), ai_x / ai_y)
             s = (2 * ai_x * norm_x + ai_y * norm_y) / (norm_x * norm_x + norm_y * norm_y)
-            print(s)
             norm_x *= -s
             norm_y *= -s
             ai_x += norm_x
             ai_y += norm_y
             new_x = x + ai_x
             new_y = y + ai_y
-            print(self.x, self.y, '*', x, y, '*', ai_x, ai_y, '*', new_x, new_y)
-            # self.delta_y *= -1
-            self.delta_x *= -1
+
+            len_ai = math.sqrt(ai_x ** 2 + ai_y ** 2)
+            v_x = ai_x / len_ai
+            v_y = ai_y / len_ai
+            print('okd sp', self.delta_x, self.delta_y, 'new_sp', v_x, v_y)
+            # self.delta_x = v_x
+            # self.delta_y = v_y
+            print(self.x, self.y, '*', x, y, '*', ai_x, ai_y, '*', new_x, new_y, self.delta_y)
+            self.delta_y *= -1
         return new_x, new_y
 
-            # print('norm', norm_x, norm_y, 'ai', ai)
-            # print(x, y)
-            # print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
+        # print('norm', norm_x, norm_y, 'ai', ai)
+        # print(x, y)
+        # print("УРААА ПЕРЕССЕСЕСЕШЕНЬЕ")
 
-    def reflect(self, new_x, new_y, mirror): # надо найти ближайший луч, точку пересечения и отразить.
+    def reflect(self, new_x, new_y, mirror):  # надо найти ближайший луч, точку пересечения и отразить.
         pass
 
     def move(self):
@@ -158,12 +245,12 @@ def det(a, b, c, d):
     return a * d - b * c
 
 
-def between(a, b, c,):
+def between(a, b, c, ):
     return min(a, b) <= c + EPS and c <= max(a, b) + EPS
 
 
 def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
-    A1, B1= y1 - y2, x2 - x1
+    A1, B1 = y1 - y2, x2 - x1
     C1 = -A1 * x1 - B1 * y1
     A2, B2 = y3 - y4, x4 - x3
     C2 = -A2 * x3 - B2 * y3
@@ -175,7 +262,7 @@ def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
     else:
         return det(A1, C1, A2, C2) == 0 and \
                det(B1, C1, B2, C2) == 0 and \
-               intersect_1(x1, x2, x3, x4) and\
+               intersect_1(x1, x2, x3, x4) and \
                intersect_1(y1, y2, y3, y4), None, None
 
     # def move(self):
@@ -229,6 +316,7 @@ class MyGame(arcade.Window):
         self.ray_creation_flag = False
         self.ray_coords_x = None
         self.ray_coords_y = None
+        self.ray = RayLine(620, 80, 1000, 60, self.mirror_list)
 
     def get_mirrors(self):
         return self.mirror_list
@@ -237,6 +325,7 @@ class MyGame(arcade.Window):
         """ Set up the game and initialize the variables. """
         self.shape_list = []
         self.mirror_list = []
+
 
         for i in range(NUMBER_OF_SHAPES):
             x = random.randrange(0, SCREEN_WIDTH)
@@ -264,21 +353,23 @@ class MyGame(arcade.Window):
                                 d_angle, (red, green, blue, alpha))
             self.shape_list.append(shape)
         mirror = Mirror(50, 50, 75, 400, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(75, 400, 100, 40, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(450, 450, 530, 500, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(530, 500, 600, 480, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(600, 480, 450, 450, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(750, 80, 650, 200, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        # mirror = Mirror(600, 20, 750, 80, 'flat', 0)
-        # self.mirror_list.append(mirror)
-        mirror = Mirror(50, 50, 600, 70, 'flat', 0)
         self.mirror_list.append(mirror)
+        mirror = Mirror(75, 400, 100, 40, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(450, 450, 530, 500, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(530, 500, 600, 480, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(600, 480, 450, 450, 'flat', 0)
+        self.mirror_list.append(mirror)
+
+        mirror = Mirror(600, 20, 650, 200, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(600, 20, 750, 80, 'flat', 0)
+        self.mirror_list.append(mirror)
+        mirror = Mirror(750, 80, 650, 200, 'flat', 0)
+        self.mirror_list.append(mirror)
+        self.ray.calc_ray(620, 80, self.get_mirrors())
 
     def update(self, dt):
         """ Move everything """
@@ -296,6 +387,8 @@ class MyGame(arcade.Window):
             shape.draw()
         for mirror in self.mirror_list:
             mirror.draw()
+        self.ray.draw()
+
     def on_mouse_press(self, x, y, button, modifiers):
         """
         Called when the user presses a mouse button.
