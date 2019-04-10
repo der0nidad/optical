@@ -45,15 +45,15 @@ class MyGame(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         self.mirror_list = None
+        self.ray = None
+        self.prev_coords_y = None
+        self.prev_coords_x = None
+        self.filename = 'Optical'
+
         self.ray_creation_flag = False
         self.mirror_creation_flag = False
         self.click_flag = False
         self.continious_flag = False
-        self.prev_coords_x = None
-        self.prev_coords_y = None
-        self.filename = 'Optical'
-        # self.ray = RayLine(620, 180, 200, -700, self.mirror_list)
-        self.ray = None
 
     def get_mirrors(self):
         return self.mirror_list
@@ -156,8 +156,30 @@ class MyGame(arcade.Window):
             if self.ray:
                 arcade.draw_circle_filled(self.ray.x_0, self.ray.y_0, 5, arcade.color.RED)
 
+    # что нужно, чтобы описать комнату и происходящее в ней:
+    # список зеркал, луч(список сегментов, текущее положение, текущая скорость),
+    #  состояние флагов и мб старых координат. мб константы - высота и ширина экрана
+
     def serialize(self):
-        return {'cool_game_key': 'ты пидор'}
+        res = {
+            'mirrors': [mirror.serialize() for mirror in self.get_mirrors()],
+            'window_width': SCREEN_WIDTH,
+            'window_height': SCREEN_HEIGHT,
+            'window_title': SCREEN_TITLE,
+            'prev_coords_x': self.prev_coords_x,
+            'prev_coords_y': self.prev_coords_y,
+            'ray_creation_flag': self.ray_creation_flag,
+            'mirror_creation_flag': self.mirror_creation_flag,
+            'click_flag': self.click_flag,
+            'continious_flag': self.continious_flag
+        }
+        if self.ray:
+            res['ray'] = self.ray.serialize()
+
+        return res
+
+    def deserialize(self, data_dict):
+        pass
 
     def save_to_file(self, filename, json_content):
         with open(filename, 'w', encoding='utf-8') as f:

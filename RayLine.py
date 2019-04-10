@@ -109,3 +109,14 @@ class RayLine:
         draw_circle_filled(self.x_0, self.y_0, 5, RED)
         for ray in self.segment_list:
             ray.draw()
+
+    def serialize(self):
+        return {
+            'last_mirror': self.last_mirror.serialize(),
+            'segment_list': [segment.serialize() for segment in self.segment_list],
+            'x_0': self.x_0,
+            'y_0': self.y_0,
+            'vx': self.vx,
+            'vy': self.vy,
+            'count': self.count
+        }
