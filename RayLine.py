@@ -77,10 +77,9 @@ class RayLine:
     # сохраняем всё это дело. добавляем сегмент в список сегментов.
     def calc_ray_step(self, mirrors):
         inters_mirrors = []
-        # if self.win_circle:
-        # x0 =
+        if self.win_circle:
+            print('win_c', self.win_circle)
         for mirror in mirrors:
-            print("EKOKO", mirror.calc_equality(self.last_mirror))
             if mirror is not self.last_mirror:
                 # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
                 prs, x, y = intersect(self.x_0, self.y_0, self.x_0 + self.vx * 1000, self.y_0 + self.vy * 1000,
@@ -89,17 +88,17 @@ class RayLine:
                 if prs:
                     # find closest mirror
                     distance = math.sqrt((self.x_0 - x) ** 2 + (self.y_0 - y) ** 2)
-                    print('DISTANCEE', distance)
+                    # print('DISTANCEE', distance)
                     if distance >= EPS: # разберись в природе этого костыля плес
                         inters_mirrors.append((distance, mirror, x, y))
                         inters_mirrors.sort(key=lambda s: s[0])
-                    for i in inters_mirrors:
-                        print(i[1], end=':::')
-                    print()
+                    # for i in inters_mirrors:
+                    #     print(i[1], end=':::')
+                    # print()
                     # print(inters_mirrors)
         curr_mirror = inters_mirrors[0] if inters_mirrors and inters_mirrors[0][1] is not self.last_mirror else None
         if curr_mirror and self.count > 0:
-            print('EQU MIRRORS ', curr_mirror[1], self.last_mirror, self.last_mirror == curr_mirror[1])
+            # print('EQU MIRRORS ', curr_mirror[1], self.last_mirror, self.last_mirror == curr_mirror[1])
             x, y = curr_mirror[2], curr_mirror[3]
             ray = Segment.Segment(self.x_0, self.y_0, x, y)
             self.segment_list.append(ray)
@@ -109,7 +108,7 @@ class RayLine:
             self.x_0 = x
             self.y_0 = y
             self.last_mirror = curr_mirror[1]
-            print(self)
+            # print(self)
         else:
             print("Ой")
             print(self)
@@ -163,4 +162,4 @@ class RayLine:
             seg.deserialize(s)
             segments.append(seg)
         self.segment_list = segments
-        print('So, so', self)
+        # print('So, so', self)

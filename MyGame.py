@@ -167,7 +167,8 @@ class MyGame(arcade.Window):
         elif symbol == 117:  # u
             self.win_flag = True
         elif symbol == 110:  # n
-            self.ray.calc_ray_step(self.get_mirrors())
+            if self.ray:
+                self.ray.calc_ray_step(self.get_mirrors())
         elif symbol == 102:  # f
             if self.ray:
                 arcade.draw_circle_filled(self.ray.x_0, self.ray.y_0, 5, arcade.color.RED)
