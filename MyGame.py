@@ -164,6 +164,10 @@ class MyGame(arcade.Window):
             json.dump(json_content, f, ensure_ascii=False, )
         print('saved')
 
+    def load_from_file(self, filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            json_content = json.load(f, ensure_ascii=False, )
+            print('loaded', json_content)
 
 def main():
     window = MyGame()
