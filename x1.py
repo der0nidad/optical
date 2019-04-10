@@ -108,6 +108,9 @@ class Mirror:
         self.type = typ  # if type in ['flat', 'curve']
         self.rad = rad  # TODO дописать проверку соответствия радиуса и типа зеркала
 
+    def __str__(self):
+        return """Mirror object x1: {0}, y1: {1}, x2: {2}, y2: {3}""".format(self.x1, self.y1, self.x2, self.y2)
+
     def draw(self):
         arcade.draw_line(self.x1, self.y1, self.x2, self.y2, arcade.color.WHITE, 3)
 
@@ -137,6 +140,12 @@ class RayLine:
         self.vy = y2 - y
         self.count = LINE_NUM
         self.mirrors = mirrors
+
+    def __str__(self):
+        ss = """RayLine object. x_0: {0}, y_0: {1}, \
+        vx: {2}, vy: {3}, last_mirror: {4}, count: {5}""".format(self.x_0, self.y_0, self.vx, self.vy,
+                                                                 str(self.last_mirror), self.count)
+        return ss
 
     #   Считает путь луча
     def calc_ray(self, mirrors):
@@ -196,8 +205,8 @@ class RayLine:
         for mirror in mirrors:
             if mirror is not self.last_mirror:
                 # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
-                prs, x, y = intersect(self.x_0, self.y_0, self.x_0 + self.vx * 400, self.y_0 + self.vy * 400, mirror.x1,
-                                      mirror.y1, mirror.x2, mirror.y2)
+                prs, x, y = intersect(self.x_0, self.y_0, self.x_0 + self.vx * 1000, self.y_0 + self.vy * 1000,
+                                      mirror.x1, mirror.y1, mirror.x2, mirror.y2)
                 # print(prs, x, y)
                 if prs:
                     # find closest mirror
@@ -205,19 +214,26 @@ class RayLine:
                     inters_mirrors.append((distance, mirror, x, y))
                     inters_mirrors.sort(key=lambda s: s[0])
                     print(inters_mirrors)
-                curr_mirror = inters_mirrors[0]
-                if curr_mirror[1] is not self.last_mirror:
-                    x, y = curr_mirror[2], curr_mirror[3]
-                    ray = Segment(self.x_0, self.y_0, x, y)
-                    self.segment_list.append(ray)
-                    ai_x, ai_y = reflect(self.x_0, self.y_0, x, y, mirror)
-                    self.vx = ai_x
-                    self.vy = ai_y
-                    self.x_0 = x
-                    self.y_0 = y
-                    self.last_mirror = mirror
+        curr_mirror = inters_mirrors[0] if inters_mirrors and inters_mirrors[0][1] is not self.last_mirror else None
+        if curr_mirror and self.count > 0:
+            x, y = curr_mirror[2], curr_mirror[3]
+            ray = Segment(self.x_0, self.y_0, x, y)
+            self.segment_list.append(ray)
+            ai_x, ai_y = reflect(self.x_0, self.y_0, x, y, curr_mirror[1])
+            self.vx = ai_x
+            self.vy = ai_y
+            self.x_0 = x
+            self.y_0 = y
+            self.last_mirror = curr_mirror[1]
+            print(self)
+        else:
+            print("Ой")
+            print(self)
+            print(inters_mirrors)
+        self.count -= 1
 
     def draw(self):
+        arcade.draw_circle_filled(self.x_0, self.y_0, 5, arcade.color.RED)
         for ray in self.segment_list:
             ray.draw()
 
@@ -236,7 +252,8 @@ class MyGame(arcade.Window):
         self.prev_coords_x = None
         self.prev_coords_y = None
         self.filename = 'Optical'
-        self.ray = RayLine(620, 180, 200, -700, self.mirror_list)
+        # self.ray = RayLine(620, 180, 200, -700, self.mirror_list)
+        self.ray = None
 
     def get_mirrors(self):
         return self.mirror_list
@@ -291,7 +308,7 @@ class MyGame(arcade.Window):
                     self.click_flag = False
             elif self.ray_creation_flag:
                 self.ray = RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list)
-                self.ray.calc_ray(self.mirror_list)
+                # self.ray.calc_ray(self.mirror_list)
                 self.click_flag = False
         else:
             if self.continious_flag:
@@ -333,6 +350,13 @@ class MyGame(arcade.Window):
         elif symbol == 113:  # q - exit
             print('bye')
             sys.exit(0)
+        elif symbol == 117:  # u
+            pass
+        elif symbol == 110:  # n
+            self.ray.calc_ray_step(self.get_mirrors())
+        elif symbol == 102:  # f
+            if self.ray:
+                arcade.draw_circle_filled(self.ray.x_0, self.ray.y_0, 5, arcade.color.RED)
 
     def serialize(self):
         return {'cool_game_key': 'ты пидор'}
