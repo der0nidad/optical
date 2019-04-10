@@ -160,7 +160,7 @@ class MyGame(arcade.Window):
             json_content = self.serialize()
             self.save_to_file(str(self.filename) + '.json', json_content)
         elif symbol == 108:  # l - load from json. rewrite current room
-            pass
+            self.load_from_file(self.filename+'.json')
         elif symbol == 113:  # q - exit
             print('bye')
             sys.exit(0)
@@ -185,9 +185,9 @@ class MyGame(arcade.Window):
     def serialize(self):
         res = {
             'mirrors': [mirror.serialize() for mirror in self.get_mirrors()],
-            'window_width': SCREEN_WIDTH,
-            'window_height': SCREEN_HEIGHT,
-            'window_title': SCREEN_TITLE,
+            # 'window_width': SCREEN_WIDTH,
+            # 'window_height': SCREEN_HEIGHT,
+            # 'window_title': SCREEN_TITLE,
             'prev_coords_x': self.prev_coords_x,
             'prev_coords_y': self.prev_coords_y,
             'ray_creation_flag': self.ray_creation_flag,
@@ -201,16 +201,39 @@ class MyGame(arcade.Window):
         return res
 
     def deserialize(self, data):
-        m_list = data['mirrors']
+        if not isinstance(data, dict):
+            raise TypeError('Incorrect type of MyGame dict')
+        m_l = data.get('mirrors')
+        if m_l:
+            mrs = []
+        for m_data in m_l:
+            mir = Mirror.Mirror(0, 0, 0, 0, 'flat', 0)
+            mir.deserialize(m_data)
+            mrs.append(mir)
+        self.mirror_list = mrs
+
+        self.prev_coords_x = data.get('prev_coords_x', 0)
+        self.prev_coords_y = data.get('prev_coords_y', 0)
+        self.ray_creation_flag = data.get('ray_creation_flag', False)
+        self.mirror_creation_flag = data.get('mirror_creation_flag', False)
+        self.click_flag = data.get('click_flag', False)
+        self.continious_flag = data.get('continious_flag', False)
+
+        if data.get('ray'):
+            self.ray = RayLine.RayLine(0,0,0,0,None, 0, None)
+            self.ray.deserialize(data['ray'])
+
+
 
     def save_to_file(self, filename, json_content):
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(json_content, f, ensure_ascii=False, )
+            json.dump(json_content, f, ensure_ascii=False )
         print('saved')
 
     def load_from_file(self, filename):
         with open(filename, 'r', encoding='utf-8') as f:
-            json_content = json.load(f, ensure_ascii=False, )
+            json_content = json.load(f)
+            self.deserialize(json_content)
             print('loaded', json_content)
 
 

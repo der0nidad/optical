@@ -134,17 +134,25 @@ class RayLine:
         self.count = data.get('count')
 
         m_l = data.get('mirrors')
-        if m_l:
+        if m_l is None:
             mrs = []
-        for m in m_l:
-            mrs.append(Mirror.Mirror().create(m['x1'], m['y1'], m['x2'], m['y2'], 'flat', 0))
-        self.mirrors = mrs
-        m = data.get('last_mirror')
-        if m:
-            self.last_mirror = Mirror.Mirror().create(m['x1'], m['y1'], m['x2'], m['y2'], 'flat', 0)
+        else:
+            for m_data in m_l:
+                mir = Mirror.Mirror(0, 0, 0, 0, 'flat', 0)
+                mir.deserialize(m_data)
+                mrs.append(mir)
+            self.mirrors = mrs
+        m_data = data.get('last_mirror')
+        if m_data:
+            mir = Mirror.Mirror(0, 0, 0, 0, 'flat', 0)
+            mir.deserialize(m_data)
+            self.last_mirror = mir
 
         s_l = data.get('segment_list')
         segments = []
         for s in s_l:
-            segments.append(Segment.Segment(s['x1'], s['y1'], s['x2'], s['y2']))
+            seg = Segment.Segment(0, 0, 0, 0)
+            seg.deserialize(s)
+            segments.append(seg)
         self.segment_list = segments
+        print(self)
