@@ -129,6 +129,7 @@ class Segment:
 # класс содержит текущий вектор скорости и список уже имеющихся лучей
 class RayLine:
     def __init__(self, x, y, x2, y2, mirrors):
+        self.last_mirror = None
         self.segment_list = []
         self.x_0 = x
         self.y_0 = y
@@ -168,7 +169,6 @@ class RayLine:
                     if prs:
                         # find closest mirror
 
-
                         ray = Segment(x1, y1, x, y)
                         self.segment_list.append(ray)
                         ai_x, ai_y = reflect(x1, y1, x, y, mirror)
@@ -187,6 +187,35 @@ class RayLine:
                 print(ray, '|', len(self.segment_list))
                 return
                 # self.count = 0
+
+    # добавляет один отрезок к лучу: от зеркала до зеркала. мы принимаем последние координаты и последний вектор скорости
+    # находим следующую точку пересечения с зеркалом(кстати, многоугольник-то замкнутый), считаем новый вектор скорости
+    # сохраняем всё это дело. добавляем сегмент в список сегментов.
+    def calc_ray_step(self, mirrors):
+        inters_mirrors = []
+        for mirror in mirrors:
+            if mirror is not self.last_mirror:
+                # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
+                prs, x, y = intersect(self.x_0, self.y_0, self.x_0 + self.vx * 400, self.y_0 + self.vy * 400, mirror.x1,
+                                      mirror.y1, mirror.x2, mirror.y2)
+                # print(prs, x, y)
+                if prs:
+                    # find closest mirror
+                    distance = math.sqrt((self.x_0 - x) ** 2 + (self.y_0 - y) ** 2)
+                    inters_mirrors.append((distance, mirror, x, y))
+                    inters_mirrors.sort(key=lambda s: s[0])
+                    print(inters_mirrors)
+                curr_mirror = inters_mirrors[0]
+                if curr_mirror[1] is not self.last_mirror:
+                    x, y = curr_mirror[2], curr_mirror[3]
+                    ray = Segment(self.x_0, self.y_0, x, y)
+                    self.segment_list.append(ray)
+                    ai_x, ai_y = reflect(self.x_0, self.y_0, x, y, mirror)
+                    self.vx = ai_x
+                    self.vy = ai_y
+                    self.x_0 = x
+                    self.y_0 = y
+                    self.last_mirror = mirror
 
     def draw(self):
         for ray in self.segment_list:
