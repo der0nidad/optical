@@ -80,6 +80,7 @@ class RayLine:
         # if self.win_circle:
         # x0 =
         for mirror in mirrors:
+            print("EKOKO", mirror.calc_equality(self.last_mirror))
             if mirror is not self.last_mirror:
                 # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
                 prs, x, y = intersect(self.x_0, self.y_0, self.x_0 + self.vx * 1000, self.y_0 + self.vy * 1000,
@@ -88,11 +89,17 @@ class RayLine:
                 if prs:
                     # find closest mirror
                     distance = math.sqrt((self.x_0 - x) ** 2 + (self.y_0 - y) ** 2)
-                    inters_mirrors.append((distance, mirror, x, y))
-                    inters_mirrors.sort(key=lambda s: s[0])
-                    print(inters_mirrors)
+                    print('DISTANCEE', distance)
+                    if distance >= EPS: # разберись в природе этого костыля плес
+                        inters_mirrors.append((distance, mirror, x, y))
+                        inters_mirrors.sort(key=lambda s: s[0])
+                    for i in inters_mirrors:
+                        print(i[1], end=':::')
+                    print()
+                    # print(inters_mirrors)
         curr_mirror = inters_mirrors[0] if inters_mirrors and inters_mirrors[0][1] is not self.last_mirror else None
         if curr_mirror and self.count > 0:
+            print('EQU MIRRORS ', curr_mirror[1], self.last_mirror, self.last_mirror == curr_mirror[1])
             x, y = curr_mirror[2], curr_mirror[3]
             ray = Segment.Segment(self.x_0, self.y_0, x, y)
             self.segment_list.append(ray)
@@ -130,23 +137,24 @@ class RayLine:
         self.x_0 = data.get('x_0')
         self.y_0 = data.get('y_0')
         self.vx = data.get('vx')
-        self.vy = data.get('cy')
+        self.vy = data.get('vy')
         self.count = data.get('count')
 
         m_l = data.get('mirrors')
-        if m_l is None:
+        if m_l:
             mrs = []
-        else:
             for m_data in m_l:
                 mir = Mirror.Mirror(0, 0, 0, 0, 'flat', 0)
                 mir.deserialize(m_data)
                 mrs.append(mir)
             self.mirrors = mrs
         m_data = data.get('last_mirror')
-        if m_data:
+        if m_data is not None:
             mir = Mirror.Mirror(0, 0, 0, 0, 'flat', 0)
             mir.deserialize(m_data)
             self.last_mirror = mir
+        else:
+            self.last_mirror = None
 
         s_l = data.get('segment_list')
         segments = []
@@ -155,4 +163,4 @@ class RayLine:
             seg.deserialize(s)
             segments.append(seg)
         self.segment_list = segments
-        print(self)
+        print('So, so', self)
