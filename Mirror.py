@@ -25,3 +25,17 @@ class Mirror:
             'x2': self.x2,
             'y2': self.y2
         }
+
+    def deserialize(self, data):
+        if isinstance(data, dict):
+            if data.get('class') != 'Mirror':
+                raise ValueError('Incorrect class field value')
+            for field in ['x1', 'y1', 'x2', 'y2']:
+                if not isinstance(data.get(field), float):
+                    raise TypeError('Incorrect type of mirror coordinate')
+            self.x1 = data['x1']
+            self.y1 = data['y1']
+            self.x2 = data['x2']
+            self.y2 = data['y2']
+            self.type = 'flat'
+            self.rad = 0

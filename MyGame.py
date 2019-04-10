@@ -49,11 +49,14 @@ class MyGame(arcade.Window):
         self.prev_coords_y = None
         self.prev_coords_x = None
         self.filename = 'Optical'
+        self.win_circle = None
 
         self.ray_creation_flag = False
         self.mirror_creation_flag = False
         self.click_flag = False
         self.continious_flag = False
+        self.win_flag = False
+        self.win_click_flag = False
 
     def get_mirrors(self):
         return self.mirror_list
@@ -83,10 +86,18 @@ class MyGame(arcade.Window):
         """
         arcade.start_render()
 
-        for mirror in self.mirror_list:
-            mirror.draw()
-        if self.ray:
-            self.ray.draw()
+        if self.win_flag:
+            arcade.draw_text("You win. Contact with us to get your prize",
+                             SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, arcade.color.WHITE, 14, width=200, align="center")
+
+        else:
+            for mirror in self.mirror_list:
+                mirror.draw()
+            if self.ray:
+                self.ray.draw()
+            if self.win_circle:
+                arcade.draw_circle_filled(self.win_circle[0], self.win_circle[1], self.win_circle[2],
+                                          arcade.color.BRANDEIS_BLUE)
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -105,10 +116,13 @@ class MyGame(arcade.Window):
                 else:
                     self.click_flag = False
             elif self.ray_creation_flag:
-                self.ray = RayLine.RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list)
+                self.ray = RayLine.RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list, LINE_NUM,
+                                           self.win_circle)
                 # self.ray.calc_ray(self.mirror_list)
                 self.click_flag = False
         else:
+            if self.win_click_flag:
+                self.win_circle = (x, y, 20)
             if self.continious_flag:
                 mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
                 self.mirror_list.append(mirror)
@@ -125,15 +139,17 @@ class MyGame(arcade.Window):
             self.click_flag = False
             self.mirror_creation_flag = True
             self.ray_creation_flag = False
+            self.win_click_flag = False
         elif symbol == 100:  # d
             pass
         elif symbol == 101:  # e
             pass
         elif symbol == 114:  # r
+            self.ray_creation_flag = True
             self.click_flag = False
             self.continious_flag = False
-            self.ray_creation_flag = True
             self.mirror_creation_flag = False
+            self.win_click_flag = False
         elif symbol == 111:  # o - непрерывное создание зеркал
             self.continious_flag = not self.continious_flag
             print('Continious flag current value:', self.continious_flag)
@@ -149,12 +165,18 @@ class MyGame(arcade.Window):
             print('bye')
             sys.exit(0)
         elif symbol == 117:  # u
-            pass
+            self.win_flag = True
         elif symbol == 110:  # n
             self.ray.calc_ray_step(self.get_mirrors())
         elif symbol == 102:  # f
             if self.ray:
                 arcade.draw_circle_filled(self.ray.x_0, self.ray.y_0, 5, arcade.color.RED)
+        elif symbol == 119:  # w
+            # создать круг победы
+            self.win_click_flag = True
+            self.ray_creation_flag = False
+            self.mirror_creation_flag = False
+            self.click_flag = False
 
     # что нужно, чтобы описать комнату и происходящее в ней:
     # список зеркал, луч(список сегментов, текущее положение, текущая скорость),
@@ -178,8 +200,8 @@ class MyGame(arcade.Window):
 
         return res
 
-    def deserialize(self, data_dict):
-        pass
+    def deserialize(self, data):
+        m_list = data['mirrors']
 
     def save_to_file(self, filename, json_content):
         with open(filename, 'w', encoding='utf-8') as f:
@@ -190,6 +212,7 @@ class MyGame(arcade.Window):
         with open(filename, 'r', encoding='utf-8') as f:
             json_content = json.load(f, ensure_ascii=False, )
             print('loaded', json_content)
+
 
 def main():
     window = MyGame()

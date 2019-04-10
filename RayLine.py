@@ -1,12 +1,13 @@
 from arcade import draw_circle_filled
 from arcade.color import RED
 
+import Mirror
 import Segment
 from utils import *
 
 
 class RayLine:
-    def __init__(self, x, y, x2, y2, mirrors, line_num):
+    def __init__(self, x, y, x2, y2, mirrors, line_num, win_circle):
         self.last_mirror = None
         self.segment_list = []
         self.x_0 = x
@@ -15,6 +16,7 @@ class RayLine:
         self.vy = y2 - y
         self.count = line_num
         self.mirrors = mirrors
+        self.win_circle = win_circle
 
     def __str__(self):
         return """RayLine object. x_0: {0}, y_0: {1}, \
@@ -75,6 +77,8 @@ class RayLine:
     # сохраняем всё это дело. добавляем сегмент в список сегментов.
     def calc_ray_step(self, mirrors):
         inters_mirrors = []
+        # if self.win_circle:
+        # x0 =
         for mirror in mirrors:
             if mirror is not self.last_mirror:
                 # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
@@ -120,3 +124,27 @@ class RayLine:
             'vy': self.vy,
             'count': self.count
         }
+
+    def deserialize(self, data):
+        # TODO Add validation
+        self.x_0 = data.get('x_0')
+        self.y_0 = data.get('y_0')
+        self.vx = data.get('vx')
+        self.vy = data.get('cy')
+        self.count = data.get('count')
+
+        m_l = data.get('mirrors')
+        if m_l:
+            mrs = []
+        for m in m_l:
+            mrs.append(Mirror.Mirror().create(m['x1'], m['y1'], m['x2'], m['y2'], 'flat', 0))
+        self.mirrors = mrs
+        m = data.get('last_mirror')
+        if m:
+            self.last_mirror = Mirror.Mirror().create(m['x1'], m['y1'], m['x2'], m['y2'], 'flat', 0)
+
+        s_l = data.get('segment_list')
+        segments = []
+        for s in s_l:
+            segments.append(Segment.Segment(s['x1'], s['y1'], s['x2'], s['y2']))
+        self.segment_list = segments
