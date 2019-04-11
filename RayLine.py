@@ -16,7 +16,7 @@ class RayLine:
         self.vy = y2 - y
         self.count = line_num
         self.mirrors = mirrors
-        self.win_circle = win_circle
+        self.win_circle = win_circle  # кортеж (x0, y0, rad) или None
 
     def __str__(self):
         return """RayLine object. x_0: {0}, y_0: {1}, \
@@ -77,8 +77,6 @@ class RayLine:
     # сохраняем всё это дело. добавляем сегмент в список сегментов.
     def calc_ray_step(self, mirrors):
         inters_mirrors = []
-        if self.win_circle:
-            print('win_c', self.win_circle)
         for mirror in mirrors:
             if mirror is not self.last_mirror:
                 # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
@@ -89,7 +87,7 @@ class RayLine:
                     # find closest mirror
                     distance = math.sqrt((self.x_0 - x) ** 2 + (self.y_0 - y) ** 2)
                     # print('DISTANCEE', distance)
-                    if distance >= EPS: # разберись в природе этого костыля плес
+                    if distance >= EPS:  # разберись в природе этого костыля плес
                         inters_mirrors.append((distance, mirror, x, y))
                         inters_mirrors.sort(key=lambda s: s[0])
                     # for i in inters_mirrors:
@@ -103,6 +101,25 @@ class RayLine:
             ray = Segment.Segment(self.x_0, self.y_0, x, y)
             self.segment_list.append(ray)
             ai_x, ai_y = reflect(self.x_0, self.y_0, x, y, curr_mirror[1])
+
+            if self.win_circle:
+                print('win_c', self.win_circle)
+                # print((str(y - self.y_0).ljust(5) + 'x + ' + str(self.x_0 - x).ljust(5) + ' + ' + str(
+                #     (self.y_0 * x) - (self.x_0 * y)).ljust(5)))
+                # C new = C + A * x_0 + B * y_0 (здесь x0 и y0 - центр окружности победы)
+                A = (y - self.y_0)
+                B = (self.x_0 - x)
+                ln_w = math.sqrt(A * A + B * B)
+                C_new = self.y_0 * x - self.x_0 * y + A * self.win_circle[0] + B * self.win_circle[1]
+
+                x_w = - (A * C_new) / ln_w
+                y_w = - (B * C_new) / ln_w
+                ln_r = math.sqrt(x_w * x_w + y_w * y_w)
+                print('a', A, 'B', B, 'cnew', C_new, 'x_w', x_w, 'y_w', y_w, 'rad', ln_r)
+                if ln_r < self.win_circle[2] ** 2 * 10:
+                    print('YOU WIM!!!')
+                    # return True
+
             self.vx = ai_x
             self.vy = ai_y
             self.x_0 = x
@@ -114,6 +131,7 @@ class RayLine:
             print(self)
             print(inters_mirrors)
         self.count -= 1
+        return False
 
     def draw(self):
         draw_circle_filled(self.x_0, self.y_0, 5, RED)

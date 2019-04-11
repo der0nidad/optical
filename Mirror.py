@@ -14,8 +14,11 @@ class Mirror:
     def __str__(self):
         return """Mirror object x1: {0}, y1: {1}, x2: {2}, y2: {3}""".format(self.x1, self.y1, self.x2, self.y2)
 
-    def draw(self):
-        draw_line(self.x1, self.y1, self.x2, self.y2, WHITE, 3)
+    def draw(self, thickened=False):
+        if thickened:
+            draw_line(self.x1, self.y1, self.x2, self.y2, WHITE, 20)
+        else:
+            draw_line(self.x1, self.y1, self.x2, self.y2, WHITE, 3)
 
     def serialize(self):
         return {

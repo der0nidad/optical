@@ -17,6 +17,7 @@ If Python and Arcade are installed, this example can be run from the command lin
 python -m arcade.examples.shapes
 """
 import json
+import math
 import sys
 
 import arcade
@@ -36,7 +37,7 @@ NUMBER_OF_SHAPES = 0  # 200
 NUMBER_OF_MIRRORS = 1  # 200
 SPEED_COEF = 0.03
 
-LINE_NUM = 30
+LINE_NUM = 300
 
 
 class MyGame(arcade.Window):
@@ -57,13 +58,13 @@ class MyGame(arcade.Window):
         self.continious_flag = False
         self.win_flag = False
         self.win_click_flag = False
+        self.mirror_delete_flag = False
 
     def get_mirrors(self):
         return self.mirror_list
 
     def setup(self):
         """ Set up the game and initialize the variables. """
-        self.shape_list = []
         self.mirror_list = []
         coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20),
                       # (100, 60, 750, 60)
@@ -74,11 +75,11 @@ class MyGame(arcade.Window):
         if self.ray:
             self.ray.calc_ray(self.get_mirrors())
 
-    def update(self, dt):
-        """ Move everything """
+        self.win_circle = (507, 245, 20)
 
-        for shape in self.shape_list:
-            shape.move()
+    # def update(self, dt):
+    #     """ Move everything """
+    #     pass
 
     def on_draw(self):
         """
@@ -88,11 +89,12 @@ class MyGame(arcade.Window):
 
         if self.win_flag:
             arcade.draw_text("You win. Contact with us to get your prize",
-                             SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, arcade.color.WHITE, 14, width=200, align="center")
+                             SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50, arcade.color.WHITE, 14, width=200,
+                             align="center")
 
         else:
             for mirror in self.mirror_list:
-                mirror.draw()
+                mirror.draw(self.mirror_delete_flag)
             if self.ray:
                 self.ray.draw()
             if self.win_circle:
@@ -103,6 +105,7 @@ class MyGame(arcade.Window):
         """
         Called when the user presses a mouse button.
         """
+        # ro = abs(A * x0 + B * y0 + C) / math.sqrt(A * A + B * B)
         # arcade.window_commands.pause
 
         if self.click_flag:
@@ -123,12 +126,22 @@ class MyGame(arcade.Window):
         else:
             if self.win_click_flag:
                 self.win_circle = (x, y, 20)
-            if self.continious_flag:
+            elif self.continious_flag:
                 mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
                 self.mirror_list.append(mirror)
-            self.click_flag = True
-            self.prev_coords_x = x
-            self.prev_coords_y = y
+            elif self.mirror_delete_flag:
+                for ind, m in enumerate(self.mirror_list):
+                    A = m.y2 - m.y1  # y2 - y1
+                    B = m.x1 - m.x2  # x1 - x2
+                    C = m.y1 * m.x2 - m.x1 * m.y2  # y1 * x2 - x1 * y2
+                    distance = abs(A * x + B * y + C) / math.sqrt(A * A + B * B)
+                    # print('DIST', distance, ind)
+                    if distance < 4: # magic constant
+                        self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind+1:]
+            else:
+                self.click_flag = True
+                self.prev_coords_x = x
+                self.prev_coords_y = y
         # print(x, y)
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -141,7 +154,7 @@ class MyGame(arcade.Window):
             self.ray_creation_flag = False
             self.win_click_flag = False
         elif symbol == 100:  # d
-            pass
+            self.mirror_delete_flag = True
         elif symbol == 101:  # e
             pass
         elif symbol == 114:  # r
@@ -168,6 +181,7 @@ class MyGame(arcade.Window):
             self.win_flag = True
         elif symbol == 110:  # n
             if self.ray:
+                # self.win_flag = \
                 self.ray.calc_ray_step(self.get_mirrors())
         elif symbol == 102:  # f
             if self.ray:
