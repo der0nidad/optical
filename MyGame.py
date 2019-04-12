@@ -138,10 +138,9 @@ class MyGame(arcade.Window):
                     # print('DIST', distance, ind)
                     if distance < 4: # magic constant
                         self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind+1:]
-            else:
-                self.click_flag = True
-                self.prev_coords_x = x
-                self.prev_coords_y = y
+            self.click_flag = True
+            self.prev_coords_x = x
+            self.prev_coords_y = y
         # print(x, y)
 
     def on_key_press(self, symbol: int, modifiers: int):
@@ -153,8 +152,12 @@ class MyGame(arcade.Window):
             self.mirror_creation_flag = True
             self.ray_creation_flag = False
             self.win_click_flag = False
+            self.mirror_delete_flag = False
         elif symbol == 100:  # d
             self.mirror_delete_flag = True
+            self.mirror_creation_flag = False
+            self.win_click_flag = False
+            self.ray_creation_flag = False
         elif symbol == 101:  # e
             pass
         elif symbol == 114:  # r
@@ -163,12 +166,19 @@ class MyGame(arcade.Window):
             self.continious_flag = False
             self.mirror_creation_flag = False
             self.win_click_flag = False
+            self.mirror_delete_flag = False
         elif symbol == 111:  # o - непрерывное создание зеркал
             self.continious_flag = not self.continious_flag
             print('Continious flag current value:', self.continious_flag)
         elif symbol == 97:  # a - delete all
             self.mirror_list = []
             self.ray = None
+            self.ray_creation_flag = False
+            self.click_flag = False
+            self.continious_flag = False
+            self.mirror_creation_flag = False
+            self.win_click_flag = False
+            self.mirror_delete_flag = False
         elif symbol == 115:  # s - save to json
             json_content = self.serialize()
             self.save_to_file(str(self.filename) + '.json', json_content)
