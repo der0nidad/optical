@@ -109,14 +109,15 @@ class RayLine:
                 # C new = C + A * x_0 + B * y_0 (здесь x0 и y0 - центр окружности победы)
                 A = (y - self.y_0)
                 B = (self.x_0 - x)
-                ln_w = math.sqrt(A * A + B * B)
+                ln_w = A * A + B * B
                 C_new = self.y_0 * x - self.x_0 * y + A * self.win_circle[0] + B * self.win_circle[1]
 
                 x_w = - (A * C_new) / ln_w
                 y_w = - (B * C_new) / ln_w
                 ln_r = math.sqrt(x_w * x_w + y_w * y_w)
+                print('points', x, y, self.x_0, self.y_0)
                 print('a', A, 'B', B, 'cnew', C_new, 'x_w', x_w, 'y_w', y_w, 'rad', ln_r)
-                if ln_r < self.win_circle[2] ** 2 * 10:
+                if ln_r < self.win_circle[2]:
                     print('YOU WIM!!!')
                     # return True
 

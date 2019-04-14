@@ -126,6 +126,8 @@ class MyGame(arcade.Window):
         else:
             if self.win_click_flag:
                 self.win_circle = (x, y, 20)
+                if self.ray:
+                    self.ray.win_circle = (x, y, 20)
             elif self.continious_flag:
                 mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
                 self.mirror_list.append(mirror)
@@ -206,6 +208,8 @@ class MyGame(arcade.Window):
     # что нужно, чтобы описать комнату и происходящее в ней:
     # список зеркал, луч(список сегментов, текущее положение, текущая скорость),
     #  состояние флагов и мб старых координат. мб константы - высота и ширина экрана
+
+
 
     def serialize(self):
         res = {
