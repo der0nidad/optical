@@ -1,21 +1,3 @@
-"""
-This simple animation example shows how to use classes to animate
-multiple objects on the screen at the same time.
-
-Because this is redraws the shapes from scratch each frame, this is SLOW
-and inefficient.
-
-Using buffered drawing commands (Vertex Buffer Objects) is a bit more complex,
-but faster.
-
-See http://arcade.academy/examples/index.html#shape-lists for some examples.
-
-Also, any Sprite class put in a SpriteList and drawn with the SpriteList will
-be drawn using Vertex Buffer Objects for better performance.
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.shapes
-"""
 import json
 import math
 import sys
@@ -138,8 +120,8 @@ class MyGame(arcade.Window):
                     C = m.y1 * m.x2 - m.x1 * m.y2  # y1 * x2 - x1 * y2
                     distance = abs(A * x + B * y + C) / math.sqrt(A * A + B * B)
                     # print('DIST', distance, ind)
-                    if distance < 4: # magic constant
-                        self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind+1:]
+                    if distance < 4:  # magic constant
+                        self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind + 1:]
             self.click_flag = True
             self.prev_coords_x = x
             self.prev_coords_y = y
@@ -185,7 +167,7 @@ class MyGame(arcade.Window):
             json_content = self.serialize()
             self.save_to_file(str(self.filename) + '.json', json_content)
         elif symbol == 108:  # l - load from json. rewrite current room
-            self.load_from_file(self.filename+'.json')
+            self.load_from_file(self.filename + '.json')
         elif symbol == 113:  # q - exit
             print('bye')
             sys.exit(0)
@@ -208,8 +190,6 @@ class MyGame(arcade.Window):
     # что нужно, чтобы описать комнату и происходящее в ней:
     # список зеркал, луч(список сегментов, текущее положение, текущая скорость),
     #  состояние флагов и мб старых координат. мб константы - высота и ширина экрана
-
-
 
     def serialize(self):
         res = {
@@ -249,14 +229,12 @@ class MyGame(arcade.Window):
         self.continious_flag = data.get('continious_flag', False)
 
         if data.get('ray'):
-            self.ray = RayLine.RayLine(0,0,0,0,None, 0, None)
+            self.ray = RayLine.RayLine(0, 0, 0, 0, None, 0, None)
             self.ray.deserialize(data['ray'])
-
-
 
     def save_to_file(self, filename, json_content):
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(json_content, f, ensure_ascii=False )
+            json.dump(json_content, f, ensure_ascii=False)
         print('saved')
 
     def load_from_file(self, filename):
