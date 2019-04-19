@@ -23,55 +23,6 @@ class RayLine:
         vx: {2}, vy: {3}, last_mirror: {4}, count: {5}""".format(self.x_0, self.y_0, self.vx, self.vy,
                                                                  str(self.last_mirror), self.count)
 
-    #   Считает путь луча
-    def calc_ray(self, mirrors):
-        x1 = self.x_0
-        y1 = self.y_0
-        last_mirror = None
-        while self.count > 0:
-            inters_mirrors = []
-            fl = False
-            print('count', self.count)
-            for mirror in mirrors:
-                if mirror is not last_mirror:
-                    # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
-                    prs, x, y = intersect(x1, y1, x1 + self.vx * 400, y1 + self.vy * 400, mirror.x1, mirror.y1,
-                                          mirror.x2, mirror.y2)
-                    # print(prs, x, y)
-                    if prs:
-                        # find closest mirror
-                        distance = math.sqrt((x1 - x) ** 2 + (y1 - y) ** 2)
-                        inters_mirrors.append((distance, mirror))
-                        inters_mirrors.sort(key=lambda s: s[0])
-                        print(inters_mirrors)
-            for mirror in mirrors:
-                if mirror is not last_mirror:
-                    # print(x1, y1, x1 + self.vx, y1 + self.vy, mirror.x1, mirror.y1, mirror.x2, mirror.y2)
-                    prs, x, y = intersect(x1, y1, x1 + self.vx * 400, y1 + self.vy * 400, mirror.x1, mirror.y1,
-                                          mirror.x2, mirror.y2)
-                    # print(prs, x, y)
-                    if prs:
-                        # find closest mirror
-
-                        ray = Segment.Segment(x1, y1, x, y)
-                        self.segment_list.append(ray)
-                        ai_x, ai_y = reflect(x1, y1, x, y, mirror)
-                        self.vx = ai_x
-                        self.vy = ai_y
-
-                        x1 = x
-                        y1 = y
-                        last_mirror = mirror
-                        fl = True
-                        self.count -= 1
-                        break
-            if not fl:
-                ray = Segment.Segment(x1, y1, x1 + self.vx * 3000, y1 + self.vy * 3000)
-                self.segment_list.append(ray)
-                print(ray, '|', len(self.segment_list))
-                return
-                # self.count = 0
-
     # добавляет одинотрезок к лучу: от зеркала до зеркала. мы принимаем последние координаты и последний вектор скорости
     # находим следующую точку пересечения с зеркалом(кстати, многоугольник-то замкнутый), считаем новый вектор скорости
     # сохраняем всё это дело. добавляем сегмент в список сегментов.
@@ -90,10 +41,6 @@ class RayLine:
                     if distance >= EPS:  # разберись в природе этого костыля плес
                         inters_mirrors.append((distance, mirror, x, y))
                         inters_mirrors.sort(key=lambda s: s[0])
-                    # for i in inters_mirrors:
-                    #     print(i[1], end=':::')
-                    # print()
-                    # print(inters_mirrors)
         curr_mirror = inters_mirrors[0] if inters_mirrors and inters_mirrors[0][1] is not self.last_mirror else None
         if curr_mirror and self.count > 0:
             # print('EQU MIRRORS ', curr_mirror[1], self.last_mirror, self.last_mirror == curr_mirror[1])
@@ -103,7 +50,7 @@ class RayLine:
             ai_x, ai_y = reflect(self.x_0, self.y_0, x, y, curr_mirror[1])
 
             if self.win_circle:
-                print('win_c', self.win_circle)
+                # print('win_c', self.win_circle)
                 # print((str(y - self.y_0).ljust(5) + 'x + ' + str(self.x_0 - x).ljust(5) + ' + ' + str(
                 #     (self.y_0 * x) - (self.x_0 * y)).ljust(5)))
                 # C new = C + A * x_0 + B * y_0 (здесь x0 и y0 - центр окружности победы)
@@ -115,12 +62,11 @@ class RayLine:
                 x_w = - (A * C_new) / ln_w
                 y_w = - (B * C_new) / ln_w
                 ln_r = math.sqrt(x_w * x_w + y_w * y_w)
-                print('points', x, y, self.x_0, self.y_0)
-                print('a', A, 'B', B, 'cnew', C_new, 'x_w', x_w, 'y_w', y_w, 'rad', ln_r)
+                # print('points', x, y, self.x_0, self.y_0)
+                # print('a', A, 'B', B, 'cnew', C_new, 'x_w', x_w, 'y_w', y_w, 'rad', ln_r)
                 if ln_r < self.win_circle[2]:
                     print('YOU WIM!!!')
-                    # return True
-
+                    return True
             self.vx = ai_x
             self.vy = ai_y
             self.x_0 = x

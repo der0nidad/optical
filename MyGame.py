@@ -60,7 +60,6 @@ class MyGame(arcade.Window):
         self.win_circle = (507, 245, 20)
 
     # def update(self, dt):
-    #     """ Move everything """
     #     pass
 
     def on_draw(self):
@@ -70,8 +69,8 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         if self.win_flag:
-            arcade.draw_text("You win. Contact with us to get your prize",
-                             SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50, arcade.color.WHITE, 14, width=200,
+            arcade.draw_text("You win. \nContact with us to get your prize.",
+                             SCREEN_WIDTH // 2 - 200 , SCREEN_HEIGHT // 2, arcade.color.WHITE, 14, width=400,
                              align="center")
 
         else:
@@ -111,9 +110,11 @@ class MyGame(arcade.Window):
                 if self.ray:
                     self.ray.win_circle = (x, y, 20)
             elif self.continious_flag:
-                mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
-                self.mirror_list.append(mirror)
+                if self.prev_coords_x and self.prev_coords_y:
+                    mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
+                    self.mirror_list.append(mirror)
             elif self.mirror_delete_flag:
+                print(self.click_flag)
                 for ind, m in enumerate(self.mirror_list):
                     A = m.y2 - m.y1  # y2 - y1
                     B = m.x1 - m.x2  # x1 - x2
@@ -142,6 +143,7 @@ class MyGame(arcade.Window):
             self.mirror_creation_flag = False
             self.win_click_flag = False
             self.ray_creation_flag = False
+            self.click_flag = False
         elif symbol == 101:  # e
             pass
         elif symbol == 114:  # r
@@ -175,8 +177,7 @@ class MyGame(arcade.Window):
             self.win_flag = True
         elif symbol == 110:  # n
             if self.ray:
-                # self.win_flag = \
-                self.ray.calc_ray_step(self.get_mirrors())
+                self.win_flag = self.ray.calc_ray_step(self.get_mirrors())
         elif symbol == 102:  # f
             if self.ray:
                 arcade.draw_circle_filled(self.ray.x_0, self.ray.y_0, 5, arcade.color.RED)
@@ -186,10 +187,6 @@ class MyGame(arcade.Window):
             self.ray_creation_flag = False
             self.mirror_creation_flag = False
             self.click_flag = False
-
-    # что нужно, чтобы описать комнату и происходящее в ней:
-    # список зеркал, луч(список сегментов, текущее положение, текущая скорость),
-    #  состояние флагов и мб старых координат. мб константы - высота и ширина экрана
 
     def serialize(self):
         res = {

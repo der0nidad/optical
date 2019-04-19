@@ -45,8 +45,3 @@ class Mirror:
             self.y2 = float(data['y2'])
             self.type = 'flat'
             self.rad = 0
-
-    def calc_equality(self, mirror):
-        EPS = 10 ** -9
-        return (abs(self.x1 - mirror.x1) < EPS) and (abs(self.x2 - mirror.x2) < EPS) and (abs(
-            self.y1 - mirror.y1) < EPS) and (abs(self.y2 - mirror.y2) < EPS) and self.type == mirror.type
