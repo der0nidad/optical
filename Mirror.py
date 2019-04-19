@@ -8,8 +8,8 @@ class Mirror:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.type = typ  # if type in ['flat', 'curve']
-        self.rad = rad  # TODO дописать проверку соответствия радиуса и типа зеркала
+        self.type = typ
+        self.rad = rad
 
     def __str__(self):
         return """Mirror object x1: {0}, y1: {1}, x2: {2}, y2: {3}""".format(self.x1, self.y1, self.x2, self.y2)
@@ -35,9 +35,6 @@ class Mirror:
                 raise ValueError('Incorrect class field value')
             for field in ['x1', 'y1', 'x2', 'y2']:
                 if not (isinstance(data.get(field), float) or isinstance(data.get(field), int)):
-                    # print(self)
-                    # print(data)
-                    # print(type(data.get(field)))
                     raise TypeError('Incorrect type of mirror coordinate')
             self.x1 = float(data['x1'])
             self.y1 = float(data['y1'])

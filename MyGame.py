@@ -15,10 +15,6 @@ SCREEN_TITLE = "Optical!"
 RECT_WIDTH = 50
 RECT_HEIGHT = 50
 
-NUMBER_OF_SHAPES = 0  # 200
-NUMBER_OF_MIRRORS = 1  # 200
-SPEED_COEF = 0.03
-
 LINE_NUM = 300
 
 
@@ -49,7 +45,6 @@ class MyGame(arcade.Window):
         """ Set up the game and initialize the variables. """
         self.mirror_list = []
         coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20),
-                      # (100, 60, 750, 60)
                       (450, 500, 750, 80)]
         for c in coord_list:
             mirror = Mirror.Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
@@ -86,9 +81,6 @@ class MyGame(arcade.Window):
         """
         Called when the user presses a mouse button.
         """
-        # ro = abs(A * x0 + B * y0 + C) / math.sqrt(A * A + B * B)
-        # arcade.window_commands.pause
-
         if self.click_flag:
             if self.mirror_creation_flag:
                 mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
@@ -102,7 +94,6 @@ class MyGame(arcade.Window):
             elif self.ray_creation_flag:
                 self.ray = RayLine.RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list, LINE_NUM,
                                            self.win_circle)
-                # self.ray.calc_ray(self.mirror_list)
                 self.click_flag = False
         else:
             if self.win_click_flag:
@@ -114,19 +105,16 @@ class MyGame(arcade.Window):
                     mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
                     self.mirror_list.append(mirror)
             elif self.mirror_delete_flag:
-                print(self.click_flag)
                 for ind, m in enumerate(self.mirror_list):
                     A = m.y2 - m.y1  # y2 - y1
                     B = m.x1 - m.x2  # x1 - x2
                     C = m.y1 * m.x2 - m.x1 * m.y2  # y1 * x2 - x1 * y2
                     distance = abs(A * x + B * y + C) / math.sqrt(A * A + B * B)
-                    # print('DIST', distance, ind)
-                    if distance < 4:  # magic constant
+                    if distance < 4:
                         self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind + 1:]
             self.click_flag = True
             self.prev_coords_x = x
             self.prev_coords_y = y
-        # print(x, y)
 
     def on_key_press(self, symbol: int, modifiers: int):
         print(symbol, modifiers)
@@ -191,9 +179,6 @@ class MyGame(arcade.Window):
     def serialize(self):
         res = {
             'mirrors': [mirror.serialize() for mirror in self.get_mirrors()],
-            # 'window_width': SCREEN_WIDTH,
-            # 'window_height': SCREEN_HEIGHT,
-            # 'window_title': SCREEN_TITLE,
             'prev_coords_x': self.prev_coords_x,
             'prev_coords_y': self.prev_coords_y,
             'ray_creation_flag': self.ray_creation_flag,
