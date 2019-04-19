@@ -18,6 +18,7 @@
 \includegraphics[width=0.7\linewidth]{msu}
 \end{figure}
 \begin{centering}
+\setcounter{secnumdepth}{0}
 \text{Московский государственный университет имени М.В. Ломоносова}
 
 \text{Факультет вычислительной математики и кибернетики}
@@ -48,13 +49,13 @@
 \centerline{ Москва ~ 2019 г.}
 \end{titlepage}
 \setcounter{page}{2}
-% \renewcommand{\contentsname}{Cодержание}
-% \tableofcontents
+\renewcommand{\contentsname}{Оглавление}
+\tableofcontents
 
-\chapter*{Краткая уточнённая постановка задачи}
-\chapter*{Уточнённая постановка задачи}
+% \subsection{Краткая уточнённая постановка задачи}
+\subsection{Уточнённая постановка задачи}
 Зеркальная комната представляет в плане произвольный замкнутый М-
-угольник (4 <= М <= 9), каждая стена - плоское зеркало. Для
+угольник (4 <= М), каждая стена - плоское зеркало. Для
 проведения экспериментов необходимо определить для каждой стены комнаты
 вид зеркала (плоское или сферическое), а для каждого сферического зеркала -
 его тип (вогнутое или выпуклое) и радиус кривизны.
@@ -81,23 +82,112 @@
 Требуется, чтобы указанные действия пользователь мог производить в
 произвольном, удобном для него порядке, и изменение одного параметра
 эксперимента не должно затрагивать другие установленные параметры.
-%\addcontentsline{toc}{chapter}{Введение}
+%\addcontentsline{toc}{subsection}{Введение}
 
-\chapter*{Диаграмма классов}
-%\addcontentsline{toc}{chapter}{Основная часть}
+\subsection{Диаграмма классов}
+%\addcontentsline{toc}{subsection}{Основная часть}
+\includegraphics[width=0.7\linewidth]{cl_d}
 
 
-\chapter*{Диаграмма объектов}
+\subsection{Диаграмма объектов}
+В процессе моделирования используются следующие объекты с указанными взаимосвязами между ними:
+\includegraphics[width=0.9\linewidth]{obj_diag}
+\subsection{Текстовые спецификации интерфейса}
+\begin{verbatim}
+class Mirror:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
 
-\chapter*{Текстовые спецификации интерфейса}
-\chapter*{Инструментальные средства}
+    def draw(self, thickened=False)
+
+    def serialize(self)
+
+    def deserialize(self, data)
+
+
+class Segment:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def draw(self)
+
+    def serialize(self)
+
+    def deserialize(self, data)
+
+
+class RayLine:
+    def __init__(self, x, y, x2, y2, mirrors, line_num, win_circle):
+        self.last_mirror = None
+        self.segment_list = []
+        self.x_0 = x
+        self.y_0 = y
+        self.vx = x2 - x
+        self.vy = y2 - y
+        self.count = line_num
+        self.mirrors = mirrors
+        self.win_circle = win_circle  # кортеж (x0, y0, rad) или None
+
+    def calc_ray_step(self, mirrors)
+
+    def draw(self)
+
+    def serialize(self)
+
+    def deserialize(self, data)
+
+
+class MyGame(arcade.Window):
+    def __init__(self):
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        self.mirror_list = None
+        self.ray = None
+        self.prev_coords_y = None
+        self.prev_coords_x = None
+        self.filename = 'Optical'
+        self.win_circle = None
+
+        self.ray_creation_flag = False
+        self.mirror_creation_flag = False
+        self.click_flag = False
+        self.continious_flag = False
+        self.win_flag = False
+        self.win_click_flag = False
+        self.mirror_delete_flag = False
+
+    def get_mirrors(self)
+
+    def setup(self)
+
+    def on_draw(self)
+
+    def on_mouse_press(self, x, y, button, modifiers)
+
+    def on_key_press(self, symbol: int, modifiers: int)
+
+    def serialize(self)
+
+    def deserialize(self, data)
+
+    def save_to_file(self, filename, json_content)
+
+    def load_from_file(self, filename)
+\end{verbatim}
+
+\subsection{Инструментальные средства}
 В процессе разработки были использованы следующие инструментальные средства:
 \begin{itemize}
     \item Язык разработки: Python 3.6
     \item Среда разработки: JetBrains PyCharm Community
     \item Библиотеки: Arcade
 \end{itemize}
-\chapter*{Файловая структура}
+\subsection{Файловая структура}
 \begin{itemize}
     \item MyGame.py - главный файл
     \item RayLine.py - описание класса RayLine
@@ -109,9 +199,12 @@
     \item Optical.json - файл-сохранение. Описывает конфигурацию комнаты
 \end{itemize}
 
-\chapter*{Пользовательский интерфейс}
-Снимок экрана на одном из шагов эксперимента:
-/*скриншот с лучом и тп*/
+\subsection{Пользовательский интерфейс}
+Снимок экрана на одном из шагов(в данном случае это последний шаг, тк луч пересёк целевой круг) эксперимента:
+\newline
+% \centering
+\includegraphics[width=0.9\linewidth]{ui2}
+\newline
 Управление параметрами эксперимента осуществляется с клавиатуры. 
 Управляющие клавиши:
 \begin{itemize}
@@ -125,7 +218,7 @@
     \item l - загрузить с диска конфигурацию комнаты. 
     \item o - изменить значение флага последовательного создания зеркал. Если этот флаг установлен, будет запоминаться последняя точка создания зеркала и зеркала будут образовывать замкнутую фигуру. 
 \end{itemize}
-% \addcontentsline{toc}{chapter}{Список литературы} % добавляем пункт "Литература" в оглавление
+% \addcontentsline{toc}{subsection}{Список литературы} % добавляем пункт "Литература" в оглавление
 % \renewcommand{\bibname}{Список литературы}
 % \bibliographystyle{unsrt}
 % \bibliography{bibl}
