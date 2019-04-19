@@ -109,6 +109,7 @@ class MyGame(arcade.Window):
                     mirror = Mirror.Mirror(self.prev_coords_x, self.prev_coords_y, x, y, 'flat', 0)
                     self.mirror_list.append(mirror)
             elif self.mirror_delete_flag:
+                print(self.click_flag)
                 for ind, m in enumerate(self.mirror_list):
                     a = m.y2 - m.y1  # y2 - y1
                     b = m.x1 - m.x2  # x1 - x2
