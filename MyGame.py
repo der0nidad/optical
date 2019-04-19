@@ -106,10 +106,10 @@ class MyGame(arcade.Window):
                     self.mirror_list.append(mirror)
             elif self.mirror_delete_flag:
                 for ind, m in enumerate(self.mirror_list):
-                    A = m.y2 - m.y1  # y2 - y1
-                    B = m.x1 - m.x2  # x1 - x2
-                    C = m.y1 * m.x2 - m.x1 * m.y2  # y1 * x2 - x1 * y2
-                    distance = abs(A * x + B * y + C) / math.sqrt(A * A + B * B)
+                    a = m.y2 - m.y1  # y2 - y1
+                    b = m.x1 - m.x2  # x1 - x2
+                    c = m.y1 * m.x2 - m.x1 * m.y2  # y1 * x2 - x1 * y2
+                    distance = abs(a * x + b * y + c) / math.sqrt(a * a + b * b)
                     if distance < 4:
                         self.mirror_list = self.mirror_list[:ind] + self.mirror_list[ind + 1:]
             self.click_flag = True
