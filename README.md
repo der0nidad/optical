@@ -7,6 +7,7 @@ a. Sure that you have all package dependencies
 b. make venv, install all python dependencies and run
 ```
 python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 python MyGame.py
 ```
