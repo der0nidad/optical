@@ -11,3 +11,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 python MyGame.py
 ```
+So, now you launched project and probably you're seeing black screen.
+How we can achieve similar state as at picture:
+ 
