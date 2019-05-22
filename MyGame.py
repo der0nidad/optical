@@ -46,7 +46,7 @@ class MyGame(arcade.Window):
     def setup(self):
         """ Set up the game and initialize the variables. """
         print(os.path.isfile(self.filename + '.json'), self.filename)
-        if os.path.isfile(self.filename+ '.json'):
+        if os.path.isfile(self.filename + '.json'):
             self.load_from_file(self.filename + '.json')
         else:
             self.mirror_list = []
@@ -68,7 +68,7 @@ class MyGame(arcade.Window):
 
         if self.win_flag:
             arcade.draw_text("You win. \nContact with us to get your prize.",
-                             SCREEN_WIDTH // 2 - 200 , SCREEN_HEIGHT // 2, arcade.color.WHITE, 14, width=400,
+                             SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2, arcade.color.WHITE, 14, width=400,
                              align="center")
 
         else:
@@ -225,10 +225,13 @@ class MyGame(arcade.Window):
         print('saved')
 
     def load_from_file(self, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            json_content = json.load(f)
-            self.deserialize(json_content)
-            print('loaded', json_content)
+        if os.path.isfile(filename):
+            with open(filename, 'r', encoding='utf-8') as f:
+                json_content = json.load(f)
+                self.deserialize(json_content)
+                print('loaded', json_content)
+        else:
+            print('There isn\'t such file')
 
 
 def main():
