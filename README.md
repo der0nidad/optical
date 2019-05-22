@@ -14,3 +14,13 @@ python MyGame.py
 So, now you launched project and probably you're seeing black screen.
 How we can achieve similar state as at picture:
  
+ Controls:
+ * a - clear the room
+ * m - create Mirror in 2 clicks. Mirror is a segment with start point at the 1st click and end point at the 2nd click.
+ * r - launch a ray. The 1st click defines start point, the 2nd click defines  direction
+ * n - update ray coordinates: move the ray to the next mirror
+ * w - place the target circle
+ * d - delete mirror or target circle
+ * s - save current configuration to disk
+ * l - load current configuration from disk
+ * o - change value of continuous_flag. If this flag is set, the last creation point of the mirror will be remembered and the mirrors will form a closed figure.
