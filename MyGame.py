@@ -1,4 +1,6 @@
 import json
+import os
+
 import math
 import sys
 
@@ -43,16 +45,17 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """ Set up the game and initialize the variables. """
-        self.mirror_list = []
-        coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20),
-                      (450, 500, 750, 80)]
-        for c in coord_list:
-            mirror = Mirror.Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
-            self.mirror_list.append(mirror)
-        if self.ray:
-            self.ray.calc_ray(self.get_mirrors())
-
-        self.win_circle = (507, 245, 20)
+        print(os.path.isfile(self.filename + '.json'), self.filename)
+        if os.path.isfile(self.filename+ '.json'):
+            self.load_from_file(self.filename + '.json')
+        else:
+            self.mirror_list = []
+            coord_list = [(50, 50, 75, 400), (75, 400, 100, 40), (400, 20, 450, 500), (750, 80, 400, 20),
+                          (450, 500, 750, 80)]
+            for c in coord_list:
+                mirror = Mirror.Mirror(c[0], c[1], c[2], c[3], 'flat', 0)
+                self.mirror_list.append(mirror)
+            self.win_circle = (507, 245, 20)
 
     # def update(self, dt):
     #     pass
@@ -94,6 +97,7 @@ class MyGame(arcade.Window):
             elif self.ray_creation_flag:
                 self.ray = RayLine.RayLine(self.prev_coords_x, self.prev_coords_y, x, y, self.mirror_list, LINE_NUM,
                                            self.win_circle)
+                self.ray.calc_ray_step(self.get_mirrors())
                 self.click_flag = False
         else:
             if self.win_click_flag:
