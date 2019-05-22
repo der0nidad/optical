@@ -17,6 +17,7 @@ class RayLine:
         self.count = line_num
         self.mirrors = mirrors
         self.win_circle = win_circle  # кортеж (x0, y0, rad) или None
+        self.base_count = line_num
 
     def __str__(self):
         return """RayLine object. x_0: {0}, y_0: {1}, \
@@ -56,7 +57,7 @@ class RayLine:
                 y_w = - (b * c_new) / ln_w
                 ln_r = math.sqrt(x_w * x_w + y_w * y_w)
                 if ln_r < self.win_circle[2]:
-                        print('Вы победили за ' + str(self.count) + ' шагов(-а)')
+                        print('Вы победили за ' + str(self.base_count - self.count) + ' шагов(-а)')
                         return True
             self.vx = ai_x
             self.vy = ai_y
