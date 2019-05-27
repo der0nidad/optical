@@ -13,6 +13,7 @@ python MyGame.py
 ```
 So, now you launched project and probably you're seeing black screen.
 How can we achieve similar state as at picture:
+![Possible state of simulation room](opt-main.png)
  
  Controls:
  * a - clear the room
